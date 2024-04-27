@@ -7,8 +7,8 @@ void IndustrialliModbusRTU::begin(HardwareSerial *_serial){
     registers_head = NULL;
     registers_last = NULL;
 
-    t15    = 15000000/9600; 
-    t35    = 35000000/9600;
+    t15 = 15000000/9600; 
+    t35 = 35000000/9600;
 }
 
 void IndustrialliModbusRTU::set_slave_id(uint8_t _address){
@@ -50,7 +50,12 @@ Register* IndustrialliModbusRTU::search_register(uint16_t address){
     return NULL;
 }
 
-void IndustrialliModbusRTU::send(uint8_t _address, uint8_t *_pdu, int _pdusize){
+void IndustrialliModbusRTU::set_register(uint16_t _address, uint16_t _value){
+    Register *reg = search_register(_address);
+    reg->value = _value;
+}
+
+void IndustrialliModbusRTU::send_frame(uint8_t _address, uint8_t *_pdu, int _pdusize){
     serial->write(_address);
 
     for (int i = 0; i < _pdusize; i++){
@@ -62,36 +67,44 @@ void IndustrialliModbusRTU::send(uint8_t _address, uint8_t *_pdu, int _pdusize){
     serial->write(crc_value >> 8);
     serial->write(crc_value & 0xFF);
 
-    delay(t35);
-
     serial->flush();
+
+    delay(t35);
 }
 
-uint8_t* IndustrialliModbusRTU::receive(){
-    frame = (uint8_t *)malloc(framesize);
-    
-    for (int i = 0; i < framesize; i++){
-        frame[i] = serial->read();
+bool IndustrialliModbusRTU::receive_frame(){
+    frame_size = 0;
+
+    if(serial->available()){
+        while (serial->available()){
+            frame[frame_size++] = serial->read();
+            delayMicroseconds(t15);
+        }
+
+        uint16_t crc_frame = (frame[frame_size - 2] << 8) | (frame[frame_size - 1]);
+
+        if(crc_frame == crc(frame[0], &frame[1], frame_size - 3)){
+            return true;
+        }
     }
 
-    uint16_t crc_frame = (frame[framesize - 2] << 8) | (frame[framesize - 1]);
+    return false;
+}
 
-    if(crc_frame == crc(frame[0], &frame[1], framesize - 2)){
-        return frame;
+void IndustrialliModbusRTU::write_multiple_registers(uint8_t *_frame, uint16_t _start_register, uint16_t _n_outputs, uint8_t _byte_count){
+    for (uint16_t address = 7, index = 0; index < _n_outputs; address += 2, index++){
+        this->set_register(_start_register + index, (_frame[address] << 8) | _frame[address + 1]);
     }
 }
 
-//essa função recebe um frame e cria outro como resposta XD
-uint8_t* process_frame(uint8_t *_frame){
-    uint8_t address  = _frame[0];
-    uint8_t function = _frame[1];
-    uint16_t field_1 = (_frame[2] << 8) | _frame[3];
-    uint16_t field_2 = (_frame[3] << 8) | _frame[4];
+void IndustrialliModbusRTU::process_frame(){
+    uint8_t _address = frame[0];
+    uint8_t function = frame[1];
+    uint16_t field_1 = (frame[2] << 8) | frame[3];
+    uint16_t field_2 = (frame[4] << 8) | frame[5];
    
     switch (function){
         case FC_READ_COILS:
-            // read_coils(field_1, field_2);
-
             break;
         case FC_READ_DISCRETE_INPUTS:
             break;
@@ -106,19 +119,19 @@ uint8_t* process_frame(uint8_t *_frame){
         case FC_WRITE_MULTIPLE_COILS:
             break;
         case FC_WRITE_MULTIPLE_REGISTERS:
+            write_multiple_registers(frame, field_1, field_2, frame[6]);
             break;
-        
         default:
             break;
     }
-
-    
 }
 
 void IndustrialliModbusRTU::task(){
-    frame = receive();
-    frame = process_frame(frame);
-    send(frame[0], &frame[1], framesize - 2);
+    if(receive_frame()){
+        process_frame();
+    }
+
+    // send(frame[0], &frame[1], framesize - 2); // send response
 }
 
 uint16_t IndustrialliModbusRTU::crc(uint8_t address, uint8_t *pdu, int pdusize){
@@ -137,9 +150,4 @@ uint16_t IndustrialliModbusRTU::crc(uint8_t address, uint8_t *pdu, int pdusize){
     }
 
     return (uchCRCHi << 8 | uchCRCLo);
-}
-
-void IndustrialliModbusRTU::clear_frame(){
-    free(frame);
-    framesize = 0;
 }

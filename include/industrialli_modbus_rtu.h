@@ -56,6 +56,13 @@ enum function_code {
     FC_WRITE_MULTIPLE_REGISTERS = 0x10
 };
 
+enum exception_code {
+    EX_ILLEGAL_FUNCTION = 0x01,
+    EX_ILLEGAL_ADDRESS  = 0x02,
+    EX_ILLEGAL_VALUE    = 0x03,
+    EX_SLAVE_FAILURE    = 0x04,
+};
+
 typedef struct Register {
     uint16_t address;
     uint16_t value;
@@ -66,33 +73,38 @@ class IndustrialliModbusRTU{
 public:
     Register *registers_head;
     Register *registers_last;
-
+    
     uint8_t address;
 
-    uint8_t *frame;
-    uint8_t framesize;
+    uint8_t frame[256];
+    uint8_t frame_size;
 
     HardwareSerial *serial;
 
-    uint8_t t15;
-    uint8_t t35;
-
-
-    void set_slave_id(uint8_t _address);
+    uint16_t t15;
+    uint16_t t35;
 
     void begin(HardwareSerial *_serial);
+
+    void set_slave_id(uint8_t _address);
+    
     void task();
-    uint8_t* receive();
-    uint8_t* process_frame(uint8_t *_frame);
-    void send(uint8_t _address, uint8_t *_pdu, int _pdusize);
+    bool receive_frame();
+    void process_frame();
+    void send_frame(uint8_t _address, uint8_t *_pdu, int _pdusize);
+
+    /* Register Functions
+     */
+    Register* search_register(uint16_t _address);
+    void set_register(uint16_t _address, uint16_t _value);
+    void create_register(uint16_t _address, uint16_t _value);
+
+    /* Modbus Functions
+     */
+    void write_multiple_registers(uint8_t *_frame, uint16_t _field_1, uint16_t _field2, uint8_t byte_count);
+    
+
     uint16_t crc(uint8_t _address, uint8_t *_pdu, int _pdusize);
-
-    void create_register(uint16_t address, uint16_t value);
-    Register* search_register(uint16_t address);
-
-    void read_coils(uint16_t _start_reg, uint16_t _num_regs);
-
-    void clear_frame();
 };
 
 #endif
