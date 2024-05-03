@@ -1,5 +1,6 @@
 /* Consertar problema de receber requisições rapidas de mais
  * Montar frames de resposta
+ * fazer um frame clear para inserir 0 em todas as posições
  */
 
 #include <Arduino.h>

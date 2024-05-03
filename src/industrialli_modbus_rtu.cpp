@@ -48,53 +48,71 @@ Register* IndustrialliModbusRTU::search_register(uint16_t address){
 }
 
 void IndustrialliModbusRTU::read_coils(uint16_t _start_address, uint16_t _n_coils){
+    frame[0] = FC_READ_COILS;
+    frame[1] = ceil(_n_coils / 8);
+
     for(int reg = _n_coils - 1, bitpos = 0; reg >= 0; reg--, _start_address++, bitpos++){
         if(bitpos == 8) bitpos = 0;
 
         if(get_input_coil(_start_address)){
-            // bitSet(frame[(3 + (_n_coils-reg)/8)], bitpos);
+            bitSet(frame[(2 + (_n_coils-reg)/8)], bitpos);
         }else {
-            // bitClear(frame[(3 + (_n_coils-reg)/8)], bitpos);
+            bitClear(frame[(2 + (_n_coils-reg)/8)], bitpos);
         }
     }
+
+    frame_size       = ceil(_n_coils / 8) + 2;
+    frame_reply_type = R_REPLY_NORMAL;
 }
 
 void IndustrialliModbusRTU::read_input_coils(uint16_t _start_address, uint16_t _n_coils){
+    frame[0] = FC_READ_INPUT_COILS;
+    frame[1] = ceil(_n_coils / 8);
+    
     for(int reg = _n_coils - 1, bitpos = 0; reg >= 0; reg--, _start_address++, bitpos++){
         if(bitpos == 8) bitpos = 0;
 
         if(get_status_coil(_start_address)){
-            // bitSet(frame[(3 + (_n_coils-reg)/8)], bitpos);
+            bitSet(frame[(2 + (_n_coils-reg)/8)], bitpos);
         }else {
-            // bitClear(frame[(3 + (_n_coils-reg)/8)], bitpos);
+            bitClear(frame[(2 + (_n_coils-reg)/8)], bitpos);
         }
     }
+
+    frame_size       = ceil(_n_coils / 8) + 2;
+    frame_reply_type = R_REPLY_NORMAL;
 }
 
 void IndustrialliModbusRTU::read_holding_register(uint16_t _start_address, uint16_t _n_registers){
     uint16_t value;
+
+    frame[0] = FC_READ_HOLDING_REGISTERS;
+    frame[1] = 2 * _n_registers;
     
     for (int i = 0; i < _n_registers; i++){
         value = get_holding_register(_start_address + i);
-        // frame[?] = value >> 8;
-        // frame[? + 1] = value | 0xFF;
+        frame[2 + (2 * i)] = value >> 8;
+        frame[3 + (2 * i)] = value | 0xFF;
     }
+
+    frame_size       = 2 * _n_registers + 2;
+    frame_reply_type = R_REPLY_NORMAL;
 }
-
-
 
 void IndustrialliModbusRTU::read_input_register(uint16_t _start_address, uint16_t _n_registers){
     uint16_t value;
 
-    // frame[0] = get_slave_id();
-    // frame[1] = FC_READ_INPUT_REGISTERS;
-    // frame[2] = 2 * _n_registers ;
+    frame[0] = FC_READ_INPUT_REGISTERS;
+    frame[1] = 2 * _n_registers ;
     
     for (int i = 0; i < _n_registers; i++){
         value = get_input_register(_start_address + i);
-        // frame[3 + i] = value >> 8;
-        // frame[4 + i] = value & 0xFF;
+        frame[2 + (2 * i)] = value >> 8;
+        frame[3 + (2 * i)] = value | 0xFF;
     }
+
+    frame_size       = 2 * _n_registers + 2;
+    frame_reply_type = R_REPLY_NORMAL;
 }
 
 void IndustrialliModbusRTU::write_single_coil(uint16_t _address, uint16_t _value){
@@ -107,17 +125,35 @@ void IndustrialliModbusRTU::write_single_register(uint16_t _address, uint16_t _v
     frame_reply_type = R_REPLY_ECHO;
 }
 
-void IndustrialliModbusRTU::write_multiple_coils(uint16_t _start_address, uint16_t _n_coils){
+void IndustrialliModbusRTU::write_multiple_coils(uint8_t *_frame, uint16_t _start_address, uint16_t _n_coils){
+    frame[0] = FC_WRITE_MULTIPLE_COILS;
+    frame[1] = _start_address >> 8;
+    frame[2] = _start_address & 0xFF;
+    frame[3] = _n_coils >> 8;
+    frame[4] = _n_coils & 0xFF;
+    
     for(int reg = _n_coils - 1, bitpos = 0; reg >= 0; reg--, _start_address++, bitpos++){
         if(bitpos == 8) bitpos = 0;
-        set_status_coil(_start_address, bitRead(frame[(7 + (_n_coils-reg)/8)], bitpos));
+        set_status_coil(_start_address, bitRead(_frame[(7 + (_n_coils-reg)/8)], bitpos));
     }
+
+    frame_size       = 5;
+    frame_reply_type = R_REPLY_NORMAL;
 }
 
-void IndustrialliModbusRTU::write_multiple_registers(uint16_t _start_address, uint16_t _n_registers, uint8_t _byte_count){
+void IndustrialliModbusRTU::write_multiple_registers(uint8_t *_frame, uint16_t _start_address, uint16_t _n_registers, uint8_t _byte_count){
+    frame[0] = FC_WRITE_MULTIPLE_REGISTERS;
+    frame[1] = _start_address >> 8;
+    frame[2] = _start_address & 0xFF;
+    frame[3] = _n_registers >> 8;
+    frame[4] = _n_registers & 0xFF;
+    
     for (uint16_t address = 7, index = 0; index < _n_registers; address += 2, index++){
-        this->set_holding_register(_start_address + index, (frame[address] << 8) | frame[address + 1]);
+        this->set_holding_register(_start_address + index, (_frame[address] << 8) | _frame[address + 1]);
     }
+
+    frame_size       = 5;
+    frame_reply_type = R_REPLY_NORMAL;
 }
 
 uint16_t IndustrialliModbusRTU::crc(uint8_t address, uint8_t *pdu, int pdusize){
@@ -214,10 +250,10 @@ void IndustrialliModbusRTU::process_request(){
             write_single_register(field_1, field_2);
             break;
         case FC_WRITE_MULTIPLE_COILS:
-            write_multiple_coils(field_1, field_2);
+            write_multiple_coils(frame, field_1, field_2);
             break;
         case FC_WRITE_MULTIPLE_REGISTERS:
-            write_multiple_registers(field_1, field_2, frame[6]);
+            write_multiple_registers(frame, field_1, field_2, frame[6]);
             break;
         default:
             break;
@@ -243,7 +279,6 @@ void IndustrialliModbusRTU::send_normal_response(){
 }
 
 void IndustrialliModbusRTU::send_echo_response(){
-
     for (int i = 0; i < frame_size; i++){
         serial->write(frame[i]);
     }
