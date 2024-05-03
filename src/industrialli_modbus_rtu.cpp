@@ -156,17 +156,17 @@ void IndustrialliModbusRTU::write_multiple_registers(uint8_t *_frame, uint16_t _
     frame_reply_type = R_REPLY_NORMAL;
 }
 
-uint16_t IndustrialliModbusRTU::crc(uint8_t address, uint8_t *pdu, int pdusize){
+uint16_t IndustrialliModbusRTU::crc(uint8_t _address, uint8_t *_pdu, int _pdu_size){
     uint8_t uchCRCHi = 0xFF;
     uint8_t uchCRCLo = 0xFF;
     uint8_t uIndex;
 
-    uIndex   = uchCRCLo ^ address;
+    uIndex   = uchCRCLo ^ _address;
     uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex];
     uchCRCHi = auchCRCLo[uIndex];
     
-    while(pdusize--){
-        uIndex   = uchCRCLo ^ *pdu++;
+    while(_pdu_size--){
+        uIndex   = uchCRCLo ^ *_pdu++;
         uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex];
         uchCRCHi = auchCRCLo[uIndex];
     }
