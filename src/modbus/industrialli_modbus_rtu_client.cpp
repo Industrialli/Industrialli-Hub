@@ -47,36 +47,30 @@ Register* IndustrialliModbusRTUClient::search_register(uint16_t address){
     return NULL;
 }
 
-void IndustrialliModbusRTUClient::process_response_read_coils(){
-
+void IndustrialliModbusRTUClient::process_response_read_coils(uint16_t _start_address, uint16_t _n_coils){
+    for(int reg = _n_coils - 1, bitpos = 0; reg >= 0; reg--, _start_address++, bitpos++){
+        if(bitpos == 8) bitpos = 0;
+        set_status_coil(_start_address, bitRead(frame[(3 + (_n_coils-reg)/8)], bitpos));
+    }
 }
 
-void IndustrialliModbusRTUClient::process_response_read_input_coils(){
-
+void IndustrialliModbusRTUClient::process_response_read_input_coils(uint16_t _start_address, uint16_t _n_coils){
+    for(int reg = _n_coils - 1, bitpos = 0; reg >= 0; reg--, _start_address++, bitpos++){
+        if(bitpos == 8) bitpos = 0;
+        set_input_coil(_start_address, bitRead(frame[(3 + (_n_coils-reg)/8)], bitpos));
+    }
 }
 
-void IndustrialliModbusRTUClient::process_response_read_holding_register(){
-
+void IndustrialliModbusRTUClient::process_response_read_holding_register(uint16_t _start_address, uint16_t _n_of_registers){
+    for (uint16_t address = 3, index = 0; index < _n_of_registers; address += 2, index++){
+        set_holding_register(_start_address + index, (frame[address] << 8) | frame[address + 1]);
+    }
 }
 
-void IndustrialliModbusRTUClient::process_response_read_input_register(){
-
-}
-
-void IndustrialliModbusRTUClient::process_response_write_single_coil(){
-
-}
-
-void IndustrialliModbusRTUClient::process_response_write_single_register(){
-
-}
-
-void IndustrialliModbusRTUClient::process_response_write_multiple_coils(){
-
-}
-
-void IndustrialliModbusRTUClient::process_response_write_multiple_registers(){
-    
+void IndustrialliModbusRTUClient::process_response_read_input_register(uint16_t _start_address, uint16_t _n_of_registers){
+for (uint16_t address = 3, index = 0; index < _n_of_registers; address += 2, index++){
+        set_input_register(_start_address + index, (frame[address] << 8) | frame[address + 1]);
+    }
 }
 
 void IndustrialliModbusRTUClient::read_coils(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils){
@@ -97,7 +91,7 @@ void IndustrialliModbusRTUClient::read_coils(uint8_t _address, uint16_t _startin
     send_request();
 
     if(receive_response()){
-        process_response();
+        process_response_read_coils(_starting_address, _quantity_of_coils);
     }
 }
 
@@ -119,7 +113,7 @@ void IndustrialliModbusRTUClient::read_input_coils(uint8_t _address, uint16_t _s
     send_request();
     
     if(receive_response()){
-        process_response();
+        process_response_read_input_coils(_starting_address, _quantity_of_coils);
     }
 }
 
@@ -141,7 +135,7 @@ void IndustrialliModbusRTUClient::read_holding_register(uint8_t _address, uint16
     send_request();
     
     if(receive_response()){
-        process_response();
+        process_response_read_holding_register(_starting_address, _quantity_of_coils);
     }
 }
 
@@ -163,7 +157,7 @@ void IndustrialliModbusRTUClient::read_input_register(uint8_t _address, uint16_t
     send_request();
     
     if(receive_response()){
-        process_response();
+        process_response_read_input_register(_starting_address, _quantity_of_coils);
     }
 }
 
@@ -183,10 +177,6 @@ void IndustrialliModbusRTUClient::write_single_coil(uint8_t _address, uint16_t _
     frame_size = 8;
 
     send_request();
-    
-    if(receive_response()){
-        process_response();
-    }
 }
 
 void IndustrialliModbusRTUClient::write_single_register(uint8_t _address, uint16_t _register_address, uint16_t _value){
@@ -205,10 +195,6 @@ void IndustrialliModbusRTUClient::write_single_register(uint8_t _address, uint16
     frame_size = 8;
 
     send_request();
-    
-    if(receive_response()){
-        process_response();
-    }
 }
 
 void IndustrialliModbusRTUClient::write_multiple_coils(uint8_t _address, uint16_t _starting_address, uint16_t* _values, uint16_t _quantity_of_coils){
@@ -236,10 +222,6 @@ void IndustrialliModbusRTUClient::write_multiple_coils(uint8_t _address, uint16_
     frame_size = 9 + frame[6];
 
     send_request();
-    
-    if(receive_response()){
-        process_response();
-    }
 }
 
 void IndustrialliModbusRTUClient::write_multiple_registers(uint8_t _address, uint16_t _starting_address, uint16_t* _values, uint16_t _quantity_of_registers){
@@ -264,10 +246,6 @@ void IndustrialliModbusRTUClient::write_multiple_registers(uint8_t _address, uin
     frame_size = 9 + frame[6];
 
     send_request();
-    
-    if(receive_response()){
-        process_response();
-    }
 }
 
 uint16_t IndustrialliModbusRTUClient::crc(uint8_t _address, uint8_t *_pdu, int _pdu_size){
@@ -321,50 +299,6 @@ bool IndustrialliModbusRTUClient::receive_response(){
     }
 
     return false;
-}
-
-void IndustrialliModbusRTUClient::process_response(){
-    uint8_t _address = frame[0];
-    uint8_t function = frame[1];
-    uint16_t field_1 = (frame[2] << 8) | frame[3];
-    uint16_t field_2 = (frame[4] << 8) | frame[5];
-   
-    switch (function){
-        case FC_READ_COILS:
-            process_response_read_coils();
-            break;
-
-        case FC_READ_INPUT_COILS:
-            process_response_read_input_coils();
-            break;
-
-        case FC_READ_HOLDING_REGISTERS:
-            process_response_read_holding_register();
-            break;
-
-        case FC_READ_INPUT_REGISTERS:
-            process_response_read_input_register();
-            break;
-
-        case FC_WRITE_SINGLE_COIL:
-            process_response_write_single_coil();
-            break;
-
-        case FC_WRITE_SINGLE_REGISTER:
-            process_response_write_single_register();
-            break;
-
-        case FC_WRITE_MULTIPLE_COILS:
-            process_response_write_multiple_coils();
-            break;
-
-        case FC_WRITE_MULTIPLE_REGISTERS:
-            process_response_write_multiple_registers();
-            break;
-            
-        default:
-            break;
-    }
 }
 
 void IndustrialliModbusRTUClient::create_status_coil(uint16_t _address, bool _value){

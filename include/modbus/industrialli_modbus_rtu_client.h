@@ -86,14 +86,10 @@ private:
     uint16_t get_register(uint16_t _address);
     Register* search_register(uint16_t _address);
 
-    void process_response_read_coils();
-    void process_response_read_input_coils();
-    void process_response_read_holding_register();
-    void process_response_read_input_register();
-    void process_response_write_single_coil();
-    void process_response_write_single_register();
-    void process_response_write_multiple_coils();
-    void process_response_write_multiple_registers();
+    void process_response_read_coils(uint16_t _start_address, uint16_t _n_coils);
+    void process_response_read_input_coils(uint16_t _start_address, uint16_t _n_coils);
+    void process_response_read_holding_register(uint16_t _start_address, uint16_t _n_of_registers);
+    void process_response_read_input_register(uint16_t _start_address, uint16_t _n_of_registers);
     
     uint16_t crc(uint8_t _address, uint8_t *_pdu, int _pdu_size);
 
@@ -102,7 +98,6 @@ public:
 
     void send_request();
     bool receive_response();
-    void process_response();
 
     void read_coils(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils);
     void read_input_coils(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils);

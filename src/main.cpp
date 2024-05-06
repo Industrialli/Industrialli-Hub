@@ -1,9 +1,13 @@
+/* A fazer: - Funções de teste unitário
+ *          - Documentação
+ *          - Processamento de mensagens de erro
+ */
 #include <Arduino.h>
 #include <HardwareSerial.h>
 
 #include "industrialli_hubInit.h"
 #include "industrialli_ledsHub.h"
-#include "industrialli_modbus_rtu_server.h"
+#include "modbus/industrialli_modbus_rtu_server.h"
 
 #define RS485_USART2_RX PD6
 #define RS485_USART2_TX PD5
