@@ -1,5 +1,5 @@
-#ifndef INDUSTRIALLI_MODBUS_RTU_H
-#define INDUSTRIALLI_MODBUS_RTU_H
+#ifndef INDUSTRIALLI_MODBUS_RTU_SERVER_H
+#define INDUSTRIALLI_MODBUS_RTU_SERVER_H
 
 #include <HardwareSerial.h>
 
@@ -75,7 +75,7 @@ typedef struct Register {
     struct Register* next;
 } Register;
 
-class IndustrialliModbusRTU{
+class IndustrialliModbusRTUServer{
 private:
     uint8_t server_address;
 
@@ -95,14 +95,14 @@ private:
     uint16_t get_register(uint16_t _address);
     Register* search_register(uint16_t _address);
     
-    void read_coils(uint16_t _start_address, uint16_t _n_coils);
-    void read_input_coils(uint16_t _start_address, uint16_t _n_coils);
-    void read_holding_register(uint16_t _start_address, uint16_t _n_registers);
-    void read_input_register(uint16_t _start_address, uint16_t _n_registers);
-    void write_single_coil(uint16_t _address, uint16_t _value);
-    void write_single_register(uint16_t _address, uint16_t _value);
-    void write_multiple_coils(uint8_t *_frame, uint16_t _start_address, uint16_t _n_coils);
-    void write_multiple_registers(uint8_t *_frame, uint16_t _start_address, uint16_t _n_registers, uint8_t byte_count);
+    void process_request_read_coils(uint16_t _start_address, uint16_t _n_coils);
+    void process_request_read_input_coils(uint16_t _start_address, uint16_t _n_coils);
+    void process_request_read_holding_register(uint16_t _start_address, uint16_t _n_registers);
+    void process_request_read_input_register(uint16_t _start_address, uint16_t _n_registers);
+    void process_request_write_single_coil(uint16_t _address, uint16_t _value);
+    void process_request_write_single_register(uint16_t _address, uint16_t _value);
+    void process_request_write_multiple_coils(uint8_t *_frame, uint16_t _start_address, uint16_t _n_coils);
+    void process_request_write_multiple_registers(uint8_t *_frame, uint16_t _start_address, uint16_t _n_registers);
     
     uint16_t crc(uint8_t _address, uint8_t *_pdu, int _pdu_size);
 
