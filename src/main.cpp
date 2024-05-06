@@ -1,6 +1,7 @@
 /* A fazer: - Funções de teste unitário
  *          - Documentação
  *          - Processamento de mensagens de erro
+ *          - Fazer classe pai Modbus e classes filhas ModbusServer e ModbusClient
  */
 #include <Arduino.h>
 #include <HardwareSerial.h>
