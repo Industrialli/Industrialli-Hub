@@ -2,52 +2,7 @@
 #include <HardwareSerial.h>
 #include <Arduino.h>
 
-void IndustrialliModbusRTUServer::create_register(uint16_t address, uint16_t value){
-    Register *new_register;
-
-	new_register = (Register *) malloc(sizeof(Register));
-	new_register->address = address;
-	new_register->value	  = value;
-	new_register->next	  = NULL;
-
-	if(registers_head == NULL) {
-        registers_head = new_register;
-        registers_last = registers_head;
-    } else {
-        registers_last->next = new_register;
-        registers_last = new_register;
-    }
-}
-
-void IndustrialliModbusRTUServer::set_register(uint16_t _address, uint16_t _value){
-    Register *reg = search_register(_address);
-    reg->value = _value;
-}
-
-uint16_t IndustrialliModbusRTUServer::get_register(uint16_t _address){
-    Register *reg = search_register(_address);
-    return reg->value;
-}
-
-Register* IndustrialliModbusRTUServer::search_register(uint16_t address){
-    Register *registers = registers_head;
-
-    if(registers == NULL){
-        return NULL;
-    }
-    
-    do {
-        if (registers->address == address){
-            return(registers);
-        }
-        
-        registers = registers->next;
-	} while(registers != NULL);
-	
-    return NULL;
-}
-
-void IndustrialliModbusRTUServer::process_request_read_coils(uint16_t _start_address, uint16_t _n_coils){
+void Industrialli_Modbus_RTU_Server::process_request_read_coils(uint16_t _start_address, uint16_t _n_coils){
     frame[0] = FC_READ_COILS;
     frame[1] = ceil(_n_coils / 8);
 
@@ -65,7 +20,7 @@ void IndustrialliModbusRTUServer::process_request_read_coils(uint16_t _start_add
     frame_reply_type = R_REPLY_NORMAL;
 }
 
-void IndustrialliModbusRTUServer::process_request_read_input_coils(uint16_t _start_address, uint16_t _n_coils){
+void Industrialli_Modbus_RTU_Server::process_request_read_input_coils(uint16_t _start_address, uint16_t _n_coils){
     frame[0] = FC_READ_INPUT_COILS;
     frame[1] = ceil(_n_coils / 8);
     
@@ -83,7 +38,7 @@ void IndustrialliModbusRTUServer::process_request_read_input_coils(uint16_t _sta
     frame_reply_type = R_REPLY_NORMAL;
 }
 
-void IndustrialliModbusRTUServer::process_request_read_holding_register(uint16_t _start_address, uint16_t _n_registers){
+void Industrialli_Modbus_RTU_Server::process_request_read_holding_register(uint16_t _start_address, uint16_t _n_registers){
     uint16_t value;
 
     frame[0] = FC_READ_HOLDING_REGISTERS;
@@ -99,7 +54,7 @@ void IndustrialliModbusRTUServer::process_request_read_holding_register(uint16_t
     frame_reply_type = R_REPLY_NORMAL;
 }
 
-void IndustrialliModbusRTUServer::process_request_read_input_register(uint16_t _start_address, uint16_t _n_registers){
+void Industrialli_Modbus_RTU_Server::process_request_read_input_register(uint16_t _start_address, uint16_t _n_registers){
     uint16_t value;
 
     frame[0] = FC_READ_INPUT_REGISTERS;
@@ -115,24 +70,24 @@ void IndustrialliModbusRTUServer::process_request_read_input_register(uint16_t _
     frame_reply_type = R_REPLY_NORMAL;
 }
 
-void IndustrialliModbusRTUServer::process_request_write_single_coil(uint16_t _address, uint16_t _value){
+void Industrialli_Modbus_RTU_Server::process_request_write_single_coil(uint16_t _address, uint16_t _value){
     set_status_coil(_address, (bool)_value);
     frame_reply_type = R_REPLY_ECHO;
 }
 
-void IndustrialliModbusRTUServer::process_request_write_single_register(uint16_t _address, uint16_t _value){
+void Industrialli_Modbus_RTU_Server::process_request_write_single_register(uint16_t _address, uint16_t _value){
     this->set_holding_register(_address, _value);
     frame_reply_type = R_REPLY_ECHO;
 }
 
-void IndustrialliModbusRTUServer::process_request_write_multiple_coils(uint8_t *_frame, uint16_t _start_address, uint16_t _n_coils){
+void Industrialli_Modbus_RTU_Server::process_request_write_multiple_coils(uint8_t *_frame, uint16_t _start_address, uint16_t _n_coils){
     frame[0] = FC_WRITE_MULTIPLE_COILS;
     frame[1] = _start_address >> 8;
     frame[2] = _start_address & 0xFF;
     frame[3] = _n_coils >> 8;
     frame[4] = _n_coils & 0xFF;
     
-    for(int reg = _n_coils - 1, bitpos = 0; reg >= 0; reg--, _start_address++, bitpos++){
+    for(int reg = _n_coils, bitpos = 0; reg >= 0; reg--, _start_address++, bitpos++){
         if(bitpos == 8) bitpos = 0;
         set_status_coil(_start_address, bitRead(_frame[(7 + (_n_coils-reg)/8)], bitpos));
     }
@@ -141,7 +96,7 @@ void IndustrialliModbusRTUServer::process_request_write_multiple_coils(uint8_t *
     frame_reply_type = R_REPLY_NORMAL;
 }
 
-void IndustrialliModbusRTUServer::process_request_write_multiple_registers(uint8_t *_frame, uint16_t _start_address, uint16_t _n_registers){
+void Industrialli_Modbus_RTU_Server::process_request_write_multiple_registers(uint8_t *_frame, uint16_t _start_address, uint16_t _n_registers){
     frame[0] = FC_WRITE_MULTIPLE_REGISTERS;
     frame[1] = _start_address >> 8;
     frame[2] = _start_address & 0xFF;
@@ -156,7 +111,7 @@ void IndustrialliModbusRTUServer::process_request_write_multiple_registers(uint8
     frame_reply_type = R_REPLY_NORMAL;
 }
 
-uint16_t IndustrialliModbusRTUServer::crc(uint8_t _address, uint8_t *_pdu, int _pdu_size){
+uint16_t Industrialli_Modbus_RTU_Server::crc(uint8_t _address, uint8_t *_pdu, int _pdu_size){
     uint8_t uchCRCHi = 0xFF;
     uint8_t uchCRCLo = 0xFF;
     uint8_t uIndex;
@@ -174,7 +129,7 @@ uint16_t IndustrialliModbusRTUServer::crc(uint8_t _address, uint8_t *_pdu, int _
     return (uchCRCHi << 8 | uchCRCLo);
 }
 
-void IndustrialliModbusRTUServer::begin(HardwareSerial *_serial){
+void Industrialli_Modbus_RTU_Server::begin(HardwareSerial *_serial){
     serial = _serial;
     registers_head = NULL;
     registers_last = NULL;
@@ -183,15 +138,15 @@ void IndustrialliModbusRTUServer::begin(HardwareSerial *_serial){
     t35 = t15 * 2;
 }
 
-void IndustrialliModbusRTUServer::set_server_address(uint8_t _server_address){
+void Industrialli_Modbus_RTU_Server::set_server_address(uint8_t _server_address){
     server_address = _server_address;
 }
 
-uint8_t IndustrialliModbusRTUServer::get_server_address(){
+uint8_t Industrialli_Modbus_RTU_Server::get_server_address(){
     return server_address;
 }
 
-void IndustrialliModbusRTUServer::task(){
+void Industrialli_Modbus_RTU_Server::task(){
     if(receive_request()){
         process_request();
 
@@ -205,26 +160,64 @@ void IndustrialliModbusRTUServer::task(){
     }
 }
 
-bool IndustrialliModbusRTUServer::receive_request(){
+bool Industrialli_Modbus_RTU_Server::receive_request(){
     frame_size = 0;
-
-    if(serial->available()){
-        while (serial->available()){
+    unsigned long startTime = 0;
+    
+    do{
+        if (serial->available()) {
+            startTime = micros();
             frame[frame_size++] = serial->read();
-            delayMicroseconds(t15);
         }
+    
+    }while (micros() - startTime <= t15 && frame_size < 256);
+    
+    while (micros() - startTime < t35);
 
-        uint16_t crc_frame = (frame[frame_size - 2] << 8) | (frame[frame_size - 1]);
+    if(frame_size == 0) return false;
 
-        if(crc_frame == crc(frame[0], &frame[1], frame_size - 3) && frame[1] == get_server_address()){
-            return true;
-        }
+    uint16_t crc_frame = (frame[frame_size - 2] << 8) | (frame[frame_size - 1]);
+
+    if(crc_frame == crc(frame[0], &frame[1], frame_size - 3) && frame[0] == get_server_address()){
+        return true;
     }
-
+    
     return false;
+    
+
+
+
+
+
+
+
+
+
+
+    // frame_size = 0;
+
+    // if(serial->available()){
+    //     SerialUSB.println("-----------------------------------------------");
+    //     while (serial->available()){
+    //         frame[frame_size++] = serial->read();
+    //         SerialUSB.println(frame[frame_size - 1]);
+    //         delayMicroseconds(t15);
+    //     }
+    //     SerialUSB.println("-----------------------------------------------");
+
+    //     uint16_t crc_frame = (frame[frame_size - 2] << 8) | (frame[frame_size - 1]);
+
+    //     if(crc_frame == crc(frame[0], &frame[1], frame_size - 3) && frame[0] == get_server_address()){
+    //         return true;
+    //     }
+    // }
+
+    
+
+    // return false;
 }
 
-void IndustrialliModbusRTUServer::process_request(){
+void Industrialli_Modbus_RTU_Server::process_request(){
     uint8_t _address = frame[0];
     uint8_t function = frame[1];
     uint16_t field_1 = (frame[2] << 8) | frame[3];
@@ -268,7 +261,7 @@ void IndustrialliModbusRTUServer::process_request(){
     }
 }
 
-void IndustrialliModbusRTUServer::send_normal_response(){
+void Industrialli_Modbus_RTU_Server::send_normal_response(){
     serial->write(get_server_address());
     serial->write(frame, frame_size);
 
@@ -282,57 +275,9 @@ void IndustrialliModbusRTUServer::send_normal_response(){
     delayMicroseconds(t35);
 }
 
-void IndustrialliModbusRTUServer::send_echo_response(){
+void Industrialli_Modbus_RTU_Server::send_echo_response(){
     serial->write(frame, frame_size);
     serial->flush();
 
     delayMicroseconds(t35);
-}
-
-void IndustrialliModbusRTUServer::create_status_coil(uint16_t _address, bool _value){
-    create_register(_address + 1, _value);
-}
-
-void IndustrialliModbusRTUServer::create_input_coil(uint16_t _address, bool _value){
-    create_register(_address + 10001, _value);
-}
-
-void IndustrialliModbusRTUServer::create_input_register(uint16_t _address, uint16_t _value){
-    create_register(_address + 30001, _value);
-}
-
-void IndustrialliModbusRTUServer::create_holding_register(uint16_t _address, uint16_t _value){
-    create_register(_address + 40001, _value);
-}
-
-void IndustrialliModbusRTUServer::set_status_coil(uint16_t _address, bool _value){
-    set_register(_address + 1, _value);
-}
-
-void IndustrialliModbusRTUServer::set_input_coil(uint16_t _address, bool _value){
-    set_register(_address + 10001, _value);
-}
-
-void IndustrialliModbusRTUServer::set_input_register(uint16_t _address, uint16_t _value){
-    set_register(_address + 30001, _value);
-}
-
-void IndustrialliModbusRTUServer::set_holding_register(uint16_t _address, uint16_t _value){
-    set_register(_address + 40001, _value);
-}
-
-bool IndustrialliModbusRTUServer::get_status_coil(uint16_t _address){
-    return get_register(_address + 1);
-}
-
-bool IndustrialliModbusRTUServer::get_input_coil(uint16_t _address){
-    return get_register(_address + 10001);
-}
-
-uint16_t IndustrialliModbusRTUServer::get_input_register(uint16_t _address){
-    return get_register(_address + 30001);
-}
-
-uint16_t IndustrialliModbusRTUServer::get_holding_register(uint16_t _address){
-    return get_register(_address + 40001);
 }

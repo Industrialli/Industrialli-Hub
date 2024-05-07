@@ -2,6 +2,7 @@
 #define INDUSTRIALLI_MODBUS_RTU_CLIENT_H
 
 #include <HardwareSerial.h>
+#include "industrialli_modbus.h"
 
 static unsigned char auchCRCHi[] = {
     0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
@@ -63,13 +64,7 @@ enum exception_code {
     EX_SLAVE_FAILURE    = 0x04,
 };
 
-typedef struct Register {
-    uint16_t address;
-    uint16_t value;
-    struct Register* next;
-} Register;
-
-class IndustrialliModbusRTUClient{
+class Industrialli_Modbus_RTU_Client : public Industrialli_Modbus{
 private:
     HardwareSerial *serial;
     uint16_t t15;
@@ -77,14 +72,6 @@ private:
 
     uint8_t frame[256];
     uint8_t frame_size;
-
-    Register *registers_head;
-    Register *registers_last;
-
-    void create_register(uint16_t _address, uint16_t _value);
-    void set_register(uint16_t _address, uint16_t _value);
-    uint16_t get_register(uint16_t _address);
-    Register* search_register(uint16_t _address);
 
     void process_response_read_coils(uint16_t _start_address, uint16_t _n_coils);
     void process_response_read_input_coils(uint16_t _start_address, uint16_t _n_coils);
@@ -105,23 +92,8 @@ public:
     void read_input_register(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils);
     void write_single_coil(uint8_t _address, uint16_t _coil_address, uint16_t _value);
     void write_single_register(uint8_t _address, uint16_t _register_address, uint16_t _value);
-    void write_multiple_coils(uint8_t _address, uint16_t _starting_address, uint16_t* _values, uint16_t _quantity_of_coils);
+    void write_multiple_coils(uint8_t _address, uint16_t _starting_address, uint8_t* _values, uint16_t _quantity_of_coils);
     void write_multiple_registers(uint8_t _address, uint16_t _starting_address, uint16_t* _values, uint16_t _quantity_of_registers);
-
-    void create_status_coil(uint16_t _address, bool _value);
-    void create_input_coil(uint16_t _address, bool _value);
-    void create_input_register(uint16_t _address, uint16_t _value);
-    void create_holding_register(uint16_t _address, uint16_t _value);
-
-    void set_status_coil(uint16_t _address, bool _value);
-    void set_input_coil(uint16_t _address, bool _value);
-    void set_input_register(uint16_t _address, uint16_t _value);
-    void set_holding_register(uint16_t _address, uint16_t _value);
-
-    bool get_status_coil(uint16_t _address);
-    bool get_input_coil(uint16_t _address);
-    uint16_t get_input_register(uint16_t _address);
-    uint16_t get_holding_register(uint16_t _address);
 };
 
 #endif
