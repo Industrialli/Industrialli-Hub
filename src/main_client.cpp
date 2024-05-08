@@ -2,7 +2,6 @@
  *          - Documentação
  *          - Processamento de mensagens de erro
  */
-#include <time.h>
 #include <Arduino.h>
 #include <HardwareSerial.h>
 
@@ -32,12 +31,12 @@ void setup(){
 }
 
 void loop() {
-	srand(time(NULL));
-
 	for (int i = 0; i < 32; i++){
 		ledsCtrl._shiftRegisterLed[i] = rand() % 2;
 	}
 
 	modbus.write_multiple_coils(10, 0, ledsCtrl._shiftRegisterLed, 32);
 	ledsCtrl.ledsUpdate();
+
+	delay(300);
 }
