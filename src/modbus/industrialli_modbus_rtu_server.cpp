@@ -8,10 +8,10 @@ void Industrialli_Modbus_RTU_Server::process_request_read_coils(uint16_t _start_
         return;
     }
 
-    if(!search_register(_start_address + 1)){
-        exception_response(FC_READ_COILS, EX_ILLEGAL_ADDRESS);
-        return;
-    }
+    // if(!search_register(_start_address + 1)){
+    //     exception_response(FC_READ_COILS, EX_ILLEGAL_ADDRESS);
+    //     return;
+    // }
 
     frame[0] = FC_READ_COILS;
     frame[1] = ceil(_n_coils / 8);
@@ -31,6 +31,11 @@ void Industrialli_Modbus_RTU_Server::process_request_read_coils(uint16_t _start_
 }
 
 void Industrialli_Modbus_RTU_Server::process_request_read_input_coils(uint16_t _start_address, uint16_t _n_coils){
+    if(_n_coils < 0x01 || _n_coils > 0x7d0){
+        exception_response(FC_READ_INPUT_COILS, EX_ILLEGAL_VALUE);
+        return;
+    }
+
     frame[0] = FC_READ_INPUT_COILS;
     frame[1] = ceil(_n_coils / 8);
     
@@ -49,6 +54,11 @@ void Industrialli_Modbus_RTU_Server::process_request_read_input_coils(uint16_t _
 }
 
 void Industrialli_Modbus_RTU_Server::process_request_read_holding_register(uint16_t _start_address, uint16_t _n_registers){
+    if(_n_registers < 0x01 || _n_registers > 0x07d){
+        exception_response(FC_READ_HOLDING_REGISTERS, EX_ILLEGAL_VALUE);
+        return;
+    }
+
     uint16_t value;
 
     frame[0] = FC_READ_HOLDING_REGISTERS;
@@ -65,6 +75,11 @@ void Industrialli_Modbus_RTU_Server::process_request_read_holding_register(uint1
 }
 
 void Industrialli_Modbus_RTU_Server::process_request_read_input_register(uint16_t _start_address, uint16_t _n_registers){
+    if(_n_registers < 0x01 || _n_registers > 0x07d){
+        exception_response(FC_READ_INPUT_REGISTERS, EX_ILLEGAL_VALUE);
+        return;
+    }
+
     uint16_t value;
 
     frame[0] = FC_READ_INPUT_REGISTERS;
@@ -81,11 +96,22 @@ void Industrialli_Modbus_RTU_Server::process_request_read_input_register(uint16_
 }
 
 void Industrialli_Modbus_RTU_Server::process_request_write_single_coil(uint16_t _address, uint16_t _value){
+    if(_value != 0x0000 && _value != 0xFF00){
+        exception_response(FC_WRITE_SINGLE_COIL, EX_ILLEGAL_VALUE);
+        return;
+    }
+
     set_status_coil(_address, (bool)_value);
     frame_reply_type = R_REPLY_ECHO;
 }
 
 void Industrialli_Modbus_RTU_Server::process_request_write_single_register(uint16_t _address, uint16_t _value){
+    //?
+    if(_value < 0x01 || _value > 0x07d0){
+        exception_response(FC_WRITE_SINGLE_REGISTER, EX_ILLEGAL_VALUE);
+        return;
+    }
+
     this->set_holding_register(_address, _value);
     frame_reply_type = R_REPLY_ECHO;
 }
