@@ -3,6 +3,16 @@
 #include <Arduino.h>
 
 void Industrialli_Modbus_RTU_Server::process_request_read_coils(uint16_t _start_address, uint16_t _n_coils){
+    if(_n_coils < 0x01 || _n_coils > 0x7d0){
+        exception_response(FC_READ_COILS, EX_ILLEGAL_VALUE);
+        return;
+    }
+
+    if(!search_register(_start_address + 1)){
+        exception_response(FC_READ_COILS, EX_ILLEGAL_ADDRESS);
+        return;
+    }
+
     frame[0] = FC_READ_COILS;
     frame[1] = ceil(_n_coils / 8);
 
@@ -111,55 +121,6 @@ void Industrialli_Modbus_RTU_Server::process_request_write_multiple_registers(ui
     frame_reply_type = R_REPLY_NORMAL;
 }
 
-uint16_t Industrialli_Modbus_RTU_Server::crc(uint8_t _address, uint8_t *_pdu, int _pdu_size){
-    uint8_t uchCRCHi = 0xFF;
-    uint8_t uchCRCLo = 0xFF;
-    uint8_t uIndex;
-
-    uIndex   = uchCRCLo ^ _address;
-    uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex];
-    uchCRCHi = auchCRCLo[uIndex];
-    
-    while(_pdu_size--){
-        uIndex   = uchCRCLo ^ *_pdu++;
-        uchCRCLo = uchCRCHi ^ auchCRCHi[uIndex];
-        uchCRCHi = auchCRCLo[uIndex];
-    }
-
-    return (uchCRCHi << 8 | uchCRCLo);
-}
-
-void Industrialli_Modbus_RTU_Server::begin(HardwareSerial *_serial){
-    serial = _serial;
-    registers_head = NULL;
-    registers_last = NULL;
-
-    t15 = 16500000/9600; 
-    t35 = t15 * 2;
-}
-
-void Industrialli_Modbus_RTU_Server::set_server_address(uint8_t _server_address){
-    server_address = _server_address;
-}
-
-uint8_t Industrialli_Modbus_RTU_Server::get_server_address(){
-    return server_address;
-}
-
-void Industrialli_Modbus_RTU_Server::task(){
-    if(receive_request()){
-        process_request();
-
-        if(frame_reply_type == R_REPLY_NORMAL){
-            send_normal_response();
-        }
-
-        if(frame_reply_type == R_REPLY_ECHO){
-            send_echo_response();
-        }
-    }
-}
-
 bool Industrialli_Modbus_RTU_Server::receive_request(){
     frame_size = 0;
     unsigned long startTime = 0;
@@ -183,38 +144,6 @@ bool Industrialli_Modbus_RTU_Server::receive_request(){
     }
     
     return false;
-    
-
-
-
-
-
-
-
-
-
-
-    // frame_size = 0;
-
-    // if(serial->available()){
-    //     SerialUSB.println("-----------------------------------------------");
-    //     while (serial->available()){
-    //         frame[frame_size++] = serial->read();
-    //         SerialUSB.println(frame[frame_size - 1]);
-    //         delayMicroseconds(t15);
-    //     }
-    //     SerialUSB.println("-----------------------------------------------");
-
-    //     uint16_t crc_frame = (frame[frame_size - 2] << 8) | (frame[frame_size - 1]);
-
-    //     if(crc_frame == crc(frame[0], &frame[1], frame_size - 3) && frame[0] == get_server_address()){
-    //         return true;
-    //     }
-    // }
-
-    
-
-    // return false;
 }
 
 void Industrialli_Modbus_RTU_Server::process_request(){
@@ -257,8 +186,17 @@ void Industrialli_Modbus_RTU_Server::process_request(){
             break;
             
         default:
+            exception_response(_address, EX_ILLEGAL_FUNCTION);
             break;
     }
+}
+
+void Industrialli_Modbus_RTU_Server::exception_response(uint8_t _error_code, uint8_t _exception_code){
+    frame[0] = _error_code + 0x80;
+    frame[1] = _exception_code;
+
+    frame_size       = 2;
+    frame_reply_type = R_REPLY_NORMAL;
 }
 
 void Industrialli_Modbus_RTU_Server::send_normal_response(){
@@ -280,4 +218,53 @@ void Industrialli_Modbus_RTU_Server::send_echo_response(){
     serial->flush();
 
     delayMicroseconds(t35);
+}
+
+uint16_t Industrialli_Modbus_RTU_Server::crc(uint8_t _address, uint8_t *_pdu, int _pdu_size){
+    uint8_t uchCRCHi = 0xFF;
+    uint8_t uchCRCLo = 0xFF;
+    uint8_t index;
+
+    index   = uchCRCLo ^ _address;
+    uchCRCLo = uchCRCHi ^ auchCRCHi[index];
+    uchCRCHi = auchCRCLo[index];
+    
+    while(_pdu_size--){
+        index   = uchCRCLo ^ *_pdu++;
+        uchCRCLo = uchCRCHi ^ auchCRCHi[index];
+        uchCRCHi = auchCRCLo[index];
+    }
+
+    return (uchCRCHi << 8 | uchCRCLo);
+}
+
+void Industrialli_Modbus_RTU_Server::begin(HardwareSerial *_serial){
+    serial = _serial;
+    registers_head = NULL;
+    registers_last = NULL;
+
+    t15 = 16500000/9600; 
+    t35 = t15 * 2;
+}
+
+void Industrialli_Modbus_RTU_Server::set_server_address(uint8_t _server_address){
+    server_address = _server_address;
+}
+
+uint8_t Industrialli_Modbus_RTU_Server::get_server_address(){
+    return server_address;
+}
+
+void Industrialli_Modbus_RTU_Server::task(){
+    if(receive_request()){
+        process_request();
+
+        if(frame_reply_type == R_REPLY_NORMAL){
+            send_normal_response();
+        }
+
+        if(frame_reply_type == R_REPLY_ECHO){
+            send_echo_response();
+        }
+    }
 }

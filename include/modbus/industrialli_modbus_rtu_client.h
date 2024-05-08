@@ -75,21 +75,21 @@ private:
 
     void process_response_read_coils(uint16_t _start_address, uint16_t _n_coils);
     void process_response_read_input_coils(uint16_t _start_address, uint16_t _n_coils);
-    void process_response_read_holding_register(uint16_t _start_address, uint16_t _n_of_registers);
-    void process_response_read_input_register(uint16_t _start_address, uint16_t _n_of_registers);
+    void process_response_read_holding_registers(uint16_t _start_address, uint16_t _n_of_registers);
+    void process_response_read_input_registers(uint16_t _start_address, uint16_t _n_of_registers);
+
+    void send_request();
+    bool receive_response();
     
     uint16_t crc(uint8_t _address, uint8_t *_pdu, int _pdu_size);
 
 public:
     void begin(HardwareSerial *_serial);
 
-    void send_request();
-    bool receive_response();
-
     void read_coils(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils);
     void read_input_coils(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils);
-    void read_holding_register(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils);
-    void read_input_register(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils);
+    void read_holding_registers(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_registers);
+    void read_input_registers(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_registers);
     void write_single_coil(uint8_t _address, uint16_t _coil_address, uint16_t _value);
     void write_single_register(uint8_t _address, uint16_t _register_address, uint16_t _value);
     void write_multiple_coils(uint8_t _address, uint16_t _starting_address, uint8_t* _values, uint16_t _quantity_of_coils);
