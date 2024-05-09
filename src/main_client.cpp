@@ -17,13 +17,11 @@
 // void setup(){
 // 	startHub.begin();
 // 	rs485_usart2_serial.begin(9600);
-// 	SerialUSB.begin(9600);
 
 // 	modbus.begin(&rs485_usart2_serial);
 
 // 	pinMode(RS485_USART2_RE_DE, OUTPUT);
-// 	digitalWrite(RS485_USART2_RE_DE, LOW);
-	
+// 	digitalWrite(RS485_USART2_RE_DE, HIGH);
 
 // 	ledsCtrl.begin();
 // }
