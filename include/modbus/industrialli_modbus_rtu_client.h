@@ -73,6 +73,8 @@ private:
     uint8_t frame[256];
     uint8_t frame_size;
 
+    uint8_t last_exception_response;
+
     void process_response_read_coils(uint16_t _start_address, uint16_t _n_coils);
     void process_response_read_input_coils(uint16_t _start_address, uint16_t _n_coils);
     void process_response_read_holding_registers(uint16_t _start_address, uint16_t _n_of_registers);
@@ -80,11 +82,14 @@ private:
 
     void send_request();
     bool receive_response();
+    bool is_exception_response(uint8_t _function_code);
     
     uint16_t crc(uint8_t _address, uint8_t *_pdu, int _pdu_size);
 
 public:
     void begin(HardwareSerial *_serial);
+
+    uint8_t get_last_exception_response();
 
     void read_coils(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils);
     void read_input_coils(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils);

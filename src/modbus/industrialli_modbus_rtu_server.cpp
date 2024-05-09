@@ -105,9 +105,10 @@ void Industrialli_Modbus_RTU_Server::process_request_write_single_coil(uint16_t 
     frame_reply_type = R_REPLY_ECHO;
 }
 
+
+
 void Industrialli_Modbus_RTU_Server::process_request_write_single_register(uint16_t _address, uint16_t _value){
-    //?
-    if(_value < 0x01 || _value > 0x07d0){
+    if(_value < 0x00 || _value > 0xFFFF){
         exception_response(FC_WRITE_SINGLE_REGISTER, EX_ILLEGAL_VALUE);
         return;
     }
@@ -117,6 +118,11 @@ void Industrialli_Modbus_RTU_Server::process_request_write_single_register(uint1
 }
 
 void Industrialli_Modbus_RTU_Server::process_request_write_multiple_coils(uint8_t *_frame, uint16_t _start_address, uint16_t _n_coils){
+    if(_n_coils < 0x01 || _n_coils > 0x07b0){
+        exception_response(FC_WRITE_MULTIPLE_COILS, EX_ILLEGAL_VALUE);
+        return;
+    }
+
     frame[0] = FC_WRITE_MULTIPLE_COILS;
     frame[1] = _start_address >> 8;
     frame[2] = _start_address & 0xFF;
@@ -133,6 +139,11 @@ void Industrialli_Modbus_RTU_Server::process_request_write_multiple_coils(uint8_
 }
 
 void Industrialli_Modbus_RTU_Server::process_request_write_multiple_registers(uint8_t *_frame, uint16_t _start_address, uint16_t _n_registers){
+    if(_n_registers < 0x01 || _n_registers > 0x07b){
+        exception_response(FC_WRITE_MULTIPLE_REGISTERS, EX_ILLEGAL_VALUE);
+        return;
+    }
+
     frame[0] = FC_WRITE_MULTIPLE_REGISTERS;
     frame[1] = _start_address >> 8;
     frame[2] = _start_address & 0xFF;
