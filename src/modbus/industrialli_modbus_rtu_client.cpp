@@ -29,23 +29,40 @@ for (uint16_t address = 3, index = 0; index < _n_of_registers; address += 2, ind
 }
 
 void Industrialli_Modbus_RTU_Client::send_request(){
+    digitalWrite(re_de_pin, HIGH);
+
     serial->write(frame, frame_size);
     serial->flush();
 
     delayMicroseconds(t35);
+
+    digitalWrite(re_de_pin, LOW);
 }
 
 bool Industrialli_Modbus_RTU_Client::receive_response(){
     frame_size = 0;
+    unsigned long startTime = millis();
 
-    if(serial->available()){
-        SerialUSB.println("--------------------------------------------");
-        while (serial->available()){
-            frame[frame_size++] = serial->read();
-            SerialUSB.println(frame_size - 1);
-            delayMicroseconds(t15);
+    while (!serial->available()) {
+        if (millis() - startTime >= response_timeout) {
+            return false;
         }
-        SerialUSB.println("--------------------------------------------");
+    }
+    
+    if(serial->available()){
+
+        do{
+            if (serial->available()) {
+                startTime = micros();
+                frame[frame_size++] = serial->read();
+                
+            }
+        
+        }while (micros() - startTime <= t15 && frame_size < 256);
+
+        while (micros() - startTime < t35);
+
+        if(frame_size == 0) return false;
 
         uint16_t crc_frame = (frame[frame_size - 2] << 8) | (frame[frame_size - 1]);
 
@@ -53,12 +70,23 @@ bool Industrialli_Modbus_RTU_Client::receive_response(){
             return true;
         }
     }
-
+    
     return false;
 }
 
 bool Industrialli_Modbus_RTU_Client::is_exception_response(uint8_t _function_code){
     return frame[1] == _function_code + 0x80;
+}
+
+void Industrialli_Modbus_RTU_Client::clear_rx_buffer(){
+    unsigned long start_time = micros();
+        
+    do {
+        if (serial->available()) {
+            start_time = micros();
+            serial->read();
+        }
+    }while (micros() - start_time < t35);
 }
 
 uint16_t Industrialli_Modbus_RTU_Client::crc(uint8_t _address, uint8_t *_pdu, int _pdu_size){
@@ -79,14 +107,18 @@ uint16_t Industrialli_Modbus_RTU_Client::crc(uint8_t _address, uint8_t *_pdu, in
     return (uchCRCHi << 8 | uchCRCLo);
 }
 
-void Industrialli_Modbus_RTU_Client::begin(HardwareSerial *_serial){
-    serial = _serial;
+void Industrialli_Modbus_RTU_Client::begin(HardwareSerial *_serial, uint8_t _re_de_pin){
+    serial         = _serial;
     registers_head = NULL;
     registers_last = NULL;
+    re_de_pin      = _re_de_pin;
     last_exception_response = 0;
 
-    t15 = 16500000/9600; 
-    t35 = t15 * 2;
+    t15 = 15000000/9600; 
+    t35 = 35000000/9600;
+    response_timeout = 100;
+
+    clear_rx_buffer();
 }
 
 uint8_t Industrialli_Modbus_RTU_Client::get_last_exception_response(){

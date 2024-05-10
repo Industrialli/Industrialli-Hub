@@ -78,6 +78,8 @@ private:
     uint16_t t15;
     uint16_t t35;
 
+    uint8_t re_de_pin;
+
     uint8_t frame[256];
     uint8_t frame_size;
     uint8_t frame_reply_type;
@@ -97,10 +99,11 @@ private:
     void send_normal_response();
     void send_echo_response();
     
+    void clear_rx_buffer();
     uint16_t crc(uint8_t _address, uint8_t *_pdu, int _pdu_size);
 
 public:
-    void begin(HardwareSerial *_serial);
+    void begin(HardwareSerial *_serial, uint8_t _re_de_pin);
 
     void set_server_address(uint8_t _server_address);
     uint8_t get_server_address();

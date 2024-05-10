@@ -69,6 +69,9 @@ private:
     HardwareSerial *serial;
     uint16_t t15;
     uint16_t t35;
+    uint8_t response_timeout;
+
+    uint8_t re_de_pin;
 
     uint8_t frame[256];
     uint8_t frame_size;
@@ -84,10 +87,11 @@ private:
     bool receive_response();
     bool is_exception_response(uint8_t _function_code);
     
+    void clear_rx_buffer();
     uint16_t crc(uint8_t _address, uint8_t *_pdu, int _pdu_size);
 
 public:
-    void begin(HardwareSerial *_serial);
+    void begin(HardwareSerial *_seria, uint8_t _re_de_pin);
 
     uint8_t get_last_exception_response();
 
