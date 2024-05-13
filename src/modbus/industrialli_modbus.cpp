@@ -37,10 +37,11 @@ Register* Industrialli_Modbus::search_register(uint16_t address){
     
     do {
         if (registers->address == address){
-            return(registers);
+            return registers;
         }
         
         registers = registers->next;
+        
 	} while(registers != NULL);
 	
     return NULL;

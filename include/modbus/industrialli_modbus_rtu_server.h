@@ -78,7 +78,7 @@ private:
     uint16_t t15;
     uint16_t t35;
 
-    uint8_t re_de_pin;
+    uint8_t de_pin;
 
     uint8_t frame[256];
     uint8_t frame_size;
@@ -86,8 +86,8 @@ private:
     
     void process_request_read_coils(uint16_t _start_address, uint16_t _n_coils);
     void process_request_read_input_coils(uint16_t _start_address, uint16_t _n_coils);
-    void process_request_read_holding_register(uint16_t _start_address, uint16_t _n_registers);
-    void process_request_read_input_register(uint16_t _start_address, uint16_t _n_registers);
+    void process_request_read_holding_registers(uint16_t _start_address, uint16_t _n_registers);
+    void process_request_read_input_registers(uint16_t _start_address, uint16_t _n_registers);
     void process_request_write_single_coil(uint16_t _address, uint16_t _value);
     void process_request_write_single_register(uint16_t _address, uint16_t _value);
     void process_request_write_multiple_coils(uint8_t *_frame, uint16_t _start_address, uint16_t _n_coils);
@@ -103,7 +103,7 @@ private:
     uint16_t crc(uint8_t _address, uint8_t *_pdu, int _pdu_size);
 
 public:
-    void begin(HardwareSerial *_serial, uint8_t _re_de_pin);
+    void begin(HardwareSerial *_serial, long _baud, int _de_pin);
 
     void set_server_address(uint8_t _server_address);
     uint8_t get_server_address();

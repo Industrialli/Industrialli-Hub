@@ -1,6 +1,4 @@
-/* A fazer:- Processamento de mensagens de erro 2
- *         - Referenciar bibliotecas utilizadas como base
- *         - Atualizar documentação
+/* A fazer:- Referenciar bibliotecas utilizadas como base
  *         - Fazer tabela de registradores para hub
  *         - Implementar alternativa analogRead
  *         - DMA
@@ -27,7 +25,7 @@ void setup(){
 	rs485_usart2_serial.begin(9600);
 	SerialUSB.begin(9600);
 
-	modbus.begin(&rs485_usart2_serial, RS485_USART2_RE_DE);
+	modbus.begin(&rs485_usart2_serial, 9600, RS485_USART2_RE_DE);
 	modbus.set_server_address(10);
 
     pinMode(RS485_USART2_RE_DE, OUTPUT);

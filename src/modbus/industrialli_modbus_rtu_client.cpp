@@ -29,14 +29,14 @@ for (uint16_t address = 3, index = 0; index < _n_of_registers; address += 2, ind
 }
 
 void Industrialli_Modbus_RTU_Client::send_request(){
-    digitalWrite(re_de_pin, HIGH);
+    digitalWrite(de_pin, HIGH);
 
     serial->write(frame, frame_size);
     serial->flush();
 
     delayMicroseconds(t35);
 
-    digitalWrite(re_de_pin, LOW);
+    digitalWrite(de_pin, LOW);
 }
 
 bool Industrialli_Modbus_RTU_Client::receive_response(){
@@ -107,16 +107,21 @@ uint16_t Industrialli_Modbus_RTU_Client::crc(uint8_t _address, uint8_t *_pdu, in
     return (uchCRCHi << 8 | uchCRCLo);
 }
 
-void Industrialli_Modbus_RTU_Client::begin(HardwareSerial *_serial, uint8_t _re_de_pin){
-    serial         = _serial;
-    registers_head = NULL;
-    registers_last = NULL;
-    re_de_pin      = _re_de_pin;
+void Industrialli_Modbus_RTU_Client::begin(HardwareSerial *_serial, long _baud, int _de_pin){
+    serial           = _serial;
+    registers_head   = NULL;
+    registers_last   = NULL;
+    de_pin           = _de_pin;
+    response_timeout = 100;
     last_exception_response = 0;
 
-    t15 = 15000000/9600; 
-    t35 = 35000000/9600;
-    response_timeout = 100;
+    if(_baud > 19200){
+        t15 = 750;
+        t35 = 1750;
+    }else{
+        t15 = 15000000/_baud; 
+        t35 = 35000000/_baud;
+    }
 
     clear_rx_buffer();
 }

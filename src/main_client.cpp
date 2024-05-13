@@ -19,7 +19,7 @@ void setup(){
 	rs485_usart2_serial.begin(9600);
 	SerialUSB.begin(9600);
 
-	modbus.begin(&rs485_usart2_serial, RS485_USART2_RE_DE);
+	modbus.begin(&rs485_usart2_serial, 9600, RS485_USART2_RE_DE);
 
 	pinMode(RS485_USART2_RE_DE, OUTPUT);
 
