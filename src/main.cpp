@@ -8,12 +8,47 @@
 #include <STM32FreeRTOS.h>
 #include <task.h>
 
-#include "industrialli_hubInit.h"
+#include "industrialli_leds.h"
+#include "industrialli_digital_output.h"
+#include "industrialli_hub.h"
 
-industrialli_hubInit hub;
+SPIClass spi_leds;
+SPIClass spi_iso;
 
-void TIM1_Init();
-void pwm_update(void *pvParameters);
+industrialli_leds leds;
+industrialli_digital_output iso;
+industrialli_hub hub;
+
+void DWT_Init();
+void DWT_Delay(uint32_t us);
+
+typedef struct{
+	int _pin;
+	int _value;
+	double _frequency;
+	int _resolution;
+} analog_write_params;
+
+void analogWrite(void *parameters);
+
+void setup(){
+	DWT_Init();
+
+	hub.begin();
+
+	iso.write(Q02, HIGH);
+	iso.update();
+
+	static const analog_write_params p1 = {Q01, 127, 500, 0xFF};
+	static const analog_write_params p3 = {Q03, 204, 1000, 0xFF};
+
+	xTaskCreate(analogWrite, "analogWrite", 256, (analog_write_params *)&p1, 1 , NULL);
+	xTaskCreate(analogWrite, "analogWrite", 256, (analog_write_params *)&p3, 1 , NULL);
+
+	vTaskStartScheduler();
+}
+
+void loop(){}
 
 void DWT_Init(void) {
     if (!(CoreDebug->DEMCR & CoreDebug_DEMCR_TRCENA_Msk)) {
@@ -23,44 +58,35 @@ void DWT_Init(void) {
     }
 }
 
-void DelayUs(uint32_t us) {
-    uint32_t start = DWT->CYCCNT;
-    uint32_t delayTicks = us * (HAL_RCC_GetHCLKFreq() / 1000000);
+void DWT_Delay(uint32_t us){
+    uint32_t startTick  = DWT->CYCCNT,
+             delayTicks = us * (SystemCoreClock/1000000);
 
-    while ((DWT->CYCCNT - start) < delayTicks) {
-        // Nada a fazer, apenas espera
-    }
+    while (DWT->CYCCNT - startTick < delayTicks);
 }
 
-void setup(){
-	HAL_Init();
-	SystemClock_Config();
-	DWT_Init();
+void analogWrite(void *parameters){
+	bool pwm_status = LOW;
 
-	hub.begin();
+	analog_write_params p = *(analog_write_params *)parameters;
 
-	bool *status = (bool *)malloc(sizeof(bool));
-	*status = HIGH;
+	int period       = (1/p._frequency) * 1000000;
+	int duty_high    = (period * p._value) / p._resolution;
+	int duty_low     = period - duty_high;
 
-	xTaskCreate(pwm_update, "pwm_update", 256, status, 1 , NULL);
-
-	vTaskStartScheduler();
-}
-
-void loop(){}
-
-void pwm_update(void *pvParameters){
 	for(;;){
-		bool *status = (bool*)pvParameters;
 
-		if(*status){
-			digitalWrite(DEBUG_LED, LOW);
-			*status = LOW;
-			DelayUs(1400);
+		if(pwm_status){
+			iso.write(p._pin, LOW);
+			iso.update();
+			pwm_status = LOW;
+			DWT_Delay(duty_low);
+			
 		} else {
-			digitalWrite(DEBUG_LED, HIGH);
-			*status = HIGH;
-			DelayUs(600);
+			iso.write(p._pin, HIGH);
+			iso.update();
+			pwm_status = HIGH;
+			DWT_Delay(duty_high);
 		}
 	}
 }
