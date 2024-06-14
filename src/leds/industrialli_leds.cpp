@@ -1,4 +1,4 @@
-#include "industrialli_leds.h"
+#include "leds/industrialli_leds.h"
 
 void industrialli_leds::begin(){
     pinMode(SPI1_NSS, OUTPUT);
@@ -50,6 +50,4 @@ void industrialli_leds::update(){
     spi_leds.transfer(leds >> 8);
     spi_leds.transfer(leds & 0xFF);
     digitalWrite(SPI1_NSS, HIGH);
-
-    set_all(LOW);
 }

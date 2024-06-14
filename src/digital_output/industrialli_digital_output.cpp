@@ -1,4 +1,4 @@
-#include "industrialli_digital_output.h"
+#include "digital_output/industrialli_digital_output.h"
 
 void industrialli_digital_output::begin(){
     pinMode(SPI4_NSS, OUTPUT);

@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include <SPI.h>
 
-#include "industrialli_leds.h"
+#include "leds/industrialli_leds.h"
 
 #define SPI4_SCK PE2
 #define SPI4_NSS PE4
@@ -32,9 +32,7 @@
 #define Q15 15
 #define Q16 16
 
-extern SPIClass spi_leds;
 extern SPIClass spi_iso;
-
 extern industrialli_leds leds;
 
 class industrialli_digital_output{

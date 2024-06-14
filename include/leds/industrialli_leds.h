@@ -1,7 +1,6 @@
 #ifndef INDUSTRIALLI_LEDS_H
 #define INDUSTRIALLI_LEDS_H
 
-#include <Arduino.h>
 #include <SPI.h>
 
 #define SPI1_NSS PA4
@@ -19,7 +18,6 @@ public:
     void set_all(bool _value);
     void update();
 
-private:
     uint32_t leds;
 };
 #endif
