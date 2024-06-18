@@ -11,9 +11,53 @@ extern volatile int _pulses_ENCA;
 extern volatile bool _rotation_ENCA;
 extern uint32_t _userMode;
 
-extern callback_function_t _userFunction;
 
-// Input dig.
+uint32_t _userMode;
+
+
+
+volatile int industrialli_digitalInputsHub::_count_00;
+volatile int industrialli_digitalInputsHub::_count_01;
+volatile int industrialli_digitalInputsHub::_count_02;
+volatile int industrialli_digitalInputsHub::_count_03;
+volatile int industrialli_digitalInputsHub::_count_04;
+volatile int industrialli_digitalInputsHub::_count_05;
+volatile int industrialli_digitalInputsHub::_count_06;
+volatile int industrialli_digitalInputsHub::_count_07;
+
+volatile bool industrialli_digitalInputsHub::_upOrDown;
+// interrupt
+volatile bool industrialli_digitalInputsHub::_input_00 = false;
+volatile bool industrialli_digitalInputsHub::_input_01 = false;
+volatile bool industrialli_digitalInputsHub::_input_02 = false;
+volatile bool industrialli_digitalInputsHub::_input_03 = false;
+volatile bool industrialli_digitalInputsHub::_input_04 = false;
+volatile bool industrialli_digitalInputsHub::_input_05 = false;
+volatile bool industrialli_digitalInputsHub::_input_06 = false;
+volatile bool industrialli_digitalInputsHub::_input_07 = false;
+
+// ENCODER
+
+volatile int industrialli_digitalInputsHub::_aStateEncoder_I01_A;
+volatile int industrialli_digitalInputsHub::_aStateEncoder_I03_A;
+volatile int industrialli_digitalInputsHub::_aStateEncoder_I05_A;
+volatile int industrialli_digitalInputsHub::_aStateEncoder_I07_A;
+
+volatile int industrialli_digitalInputsHub::_aLastStateEncoder_I01_A;
+volatile int industrialli_digitalInputsHub::_aLastStateEncoder_I03_A;
+volatile int industrialli_digitalInputsHub::_aLastStateEncoder_I05_A;
+volatile int industrialli_digitalInputsHub::_aLastStateEncoder_I07_A;
+
+volatile int industrialli_digitalInputsHub::_pulsesEncoder_I01_I02;
+volatile int industrialli_digitalInputsHub::_pulsesEncoder_I03_I04;
+volatile int industrialli_digitalInputsHub::_pulsesEncoder_I05_I06;
+volatile int industrialli_digitalInputsHub::_pulsesEncoder_I07_I08;
+
+volatile bool industrialli_digitalInputsHub::_rotationEncoder_I01_I02;
+volatile bool industrialli_digitalInputsHub::_rotationEncoder_I03_I04;
+volatile bool industrialli_digitalInputsHub::_rotationEncoder_I05_I06;
+volatile bool industrialli_digitalInputsHub::_rotationEncoder_I07_I08;
+
 #define EXTI_01 PE15
 #define EXTI_02 PE14
 #define EXTI_03 PE13
@@ -43,10 +87,9 @@ extern callback_function_t _userFunction;
 #define UP 0
 #define DOWN 1
 
-class industrialli_digitalInputsHub
-{
+class industrialli_digitalInputsHub{
 public:
-    static volatile bool _input_00; // interrupt
+    static volatile bool _input_00;
     static volatile bool _input_01;
     static volatile bool _input_02;
     static volatile bool _input_03;
@@ -86,492 +129,6 @@ public:
     static volatile bool _rotationEncoder_I05_I06;
     static volatile bool _rotationEncoder_I07_I08;
 
-    /////////////////////////////////////////////////// USUARIO //////////////////////////////////////////////////////////////////
-
-    static void beginUserInterruptInput_00() // EXTI01 USER
-    {
-        pinMode(EXTI_01, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_01), _userFunction, _userMode);
-    }
-    static void beginUserInterruptInput_01() // EXTI02 USER
-    {
-        pinMode(EXTI_02, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_02), _userFunction, _userMode);
-    }
-    static void beginUserInterruptInput_02() // EXTI03 USER
-    {
-        pinMode(EXTI_03, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_03), _userFunction, _userMode);
-    }
-    static void beginUserInterruptInput_03() // EXTI04 USER
-    {
-        pinMode(EXTI_04, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_04), _userFunction, _userMode);
-    }
-    static void beginUserInterruptInput_04() // EXTI05 USER
-    {
-        pinMode(EXTI_05, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_05), _userFunction, _userMode);
-    }
-    static void beginUserInterruptInput_05() // EXTI06 USER
-    {
-        pinMode(EXTI_06, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_06), _userFunction, _userMode);
-    }
-    static void beginUserInterruptInput_06() // EXTI07 USER
-    {
-        pinMode(EXTI_07, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_07), _userFunction, _userMode);
-    }
-    static void beginUserInterruptInput_07() // EXTI08 USER
-    {
-        pinMode(EXTI_08, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_08), _userFunction, _userMode);
-    }
-
-    /////////////////////////////////////////////////// CONTAGEM EXTI01 //////////////////////////////////////////////////////////////////
-
-    static void beginInterruptInputFalling_00() // EXTI01 FALLING CONTAGEM PNP
-    {
-        pinMode(EXTI_01, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_01), interruptInputFalling_00, FALLING);
-    }
-    static void interruptInputFalling_00(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_00++;
-        }
-        else
-        {
-            _count_00--;
-        }
-
-        interrupts();
-    }
-
-    static void beginInterruptInputRising_00() // EXTI01 RISING CONTAGEM NPN
-    {
-        pinMode(EXTI_01, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_01), interruptInputRising_00, RISING);
-    }
-    static void interruptInputRising_00(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_00++;
-        }
-        else
-        {
-            _count_00--;
-        }
-
-        interrupts();
-    }
-
-    /////////////////////////////////////////////////// CONTAGEM EXTI02 //////////////////////////////////////////////////////////////////
-
-    static void beginInterruptInputFalling_01() // EXTI02 FALLING CONTAGEM PNP
-    {
-        pinMode(EXTI_02, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_02), interruptInputFalling_01, FALLING);
-    }
-    static void interruptInputFalling_01(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_01++;
-        }
-        else
-        {
-            _count_01--;
-        }
-
-        interrupts();
-    }
-
-    static void beginInterruptInputRising_01() // EXTI02 RISING CONTAGEM NPN
-    {
-        pinMode(EXTI_02, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_02), interruptInputRising_01, RISING);
-    }
-    static void interruptInputRising_01(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_01++;
-        }
-        else
-        {
-            _count_01--;
-        }
-
-        interrupts();
-    }
-
-    /////////////////////////////////////////////////// CONTAGEM EXTI03 //////////////////////////////////////////////////////////////////
-
-    static void beginInterruptInputFalling_02() // EXTI03 FALLING CONTAGEM PNP
-    {
-        pinMode(EXTI_03, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_03), interruptInputFalling_02, FALLING);
-    }
-    static void interruptInputFalling_02(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_02++;
-        }
-        else
-        {
-            _count_02--;
-        }
-
-        interrupts();
-    }
-
-    static void beginInterruptInputRising_02() // EXTI03 RISING CONTAGEM NPN
-    {
-        pinMode(EXTI_03, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_03), interruptInputRising_02, RISING);
-    }
-    static void interruptInputRising_02(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_02++;
-        }
-        else
-        {
-            _count_02--;
-        }
-
-        interrupts();
-    }
-
-    /////////////////////////////////////////////////// CONTAGEM EXTI04 //////////////////////////////////////////////////////////////////
-
-    static void beginInterruptInputFalling_03() // EXTI04 FALLING CONTAGEM PNP
-    {
-        pinMode(EXTI_04, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_04), interruptInputFalling_03, FALLING);
-    }
-    static void interruptInputFalling_03(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_03++;
-        }
-        else
-        {
-            _count_03--;
-        }
-
-        interrupts();
-    }
-
-    static void beginInterruptInputRising_03() // EXTI04 RISING CONTAGEM NPN
-    {
-        pinMode(EXTI_04, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_04), interruptInputRising_03, RISING);
-    }
-    static void interruptInputRising_03(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_03++;
-        }
-        else
-        {
-            _count_03--;
-        }
-
-        interrupts();
-    }
-
-    /////////////////////////////////////////////////// CONTAGEM EXTI05 //////////////////////////////////////////////////////////////////
-
-    static void beginInterruptInputFalling_04() // EXTI05 FALLING CONTAGEM PNP
-    {
-        pinMode(EXTI_05, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_05), interruptInputFalling_04, FALLING);
-    }
-    static void interruptInputFalling_04(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_04++;
-        }
-        else
-        {
-            _count_04--;
-        }
-
-        interrupts();
-    }
-
-    static void beginInterruptInputRising_04() // EXTI05 RISING CONTAGEM NPN
-    {
-        pinMode(EXTI_05, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_05), interruptInputRising_04, RISING);
-    }
-    static void interruptInputRising_04(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_04++;
-        }
-        else
-        {
-            _count_04--;
-        }
-
-        interrupts();
-    }
-
-    /////////////////////////////////////////////////// CONTAGEM EXTI06 //////////////////////////////////////////////////////////////////
-
-    static void beginInterruptInputFalling_05() // EXTI06 FALLING CONTAGEM PNP
-    {
-        pinMode(EXTI_06, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_06), interruptInputFalling_05, FALLING);
-    }
-    static void interruptInputFalling_05(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_05++;
-        }
-        else
-        {
-            _count_05--;
-        }
-
-        interrupts();
-    }
-
-    static void beginInterruptInputRising_05() // EXTI06 RISING CONTAGEM NPN
-    {
-        pinMode(EXTI_06, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_06), interruptInputRising_05, RISING);
-    }
-    static void interruptInputRising_05(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_05++;
-        }
-        else
-        {
-            _count_05--;
-        }
-
-        interrupts();
-    }
-
-    /////////////////////////////////////////////////// CONTAGEM EXTI07 //////////////////////////////////////////////////////////////////
-
-    static void beginInterruptInputFalling_06() // EXTI07 FALLING CONTAGEM PNP
-    {
-        pinMode(EXTI_07, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_07), interruptInputFalling_06, FALLING);
-    }
-    static void interruptInputFalling_06(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_06++;
-        }
-        else
-        {
-            _count_06--;
-        }
-
-        interrupts();
-    }
-
-    static void beginInterruptInputRising_06() // EXTI07 RISING CONTAGEM NPN
-    {
-        pinMode(EXTI_07, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_07), interruptInputRising_06, RISING);
-    }
-    static void interruptInputRising_06(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_06++;
-        }
-        else
-        {
-            _count_06--;
-        }
-
-        interrupts();
-    }
-
-    /////////////////////////////////////////////////// CONTAGEM EXTI08 //////////////////////////////////////////////////////////////////
-
-    static void beginInterruptInputFalling_07() // EXTI08 FALLING CONTAGEM PNP
-    {
-        pinMode(EXTI_08, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_08), interruptInputFalling_07, FALLING);
-    }
-    static void interruptInputFalling_07(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_07++;
-        }
-        else
-        {
-            _count_07--;
-        }
-
-        interrupts();
-    }
-
-    static void beginInterruptInputRising_07() // EXTI08 RISING CONTAGEM NPN
-    {
-        pinMode(EXTI_08, INPUT);
-        attachInterrupt(digitalPinToInterrupt(EXTI_08), interruptInputRising_07, RISING);
-    }
-    static void interruptInputRising_07(void)
-    {
-        noInterrupts();
-        if (_upOrDown == 0)
-        {
-            _count_07++;
-        }
-        else
-        {
-            _count_07--;
-        }
-
-        interrupts();
-    }
-
-    /////////////////////////////////////////////////// ENCODER EXTI01 & EXTI02 //////////////////////////////////////////////////////////////////
-    // EXTI01 -> ENCODER A
-    // EXTI02 -> ENCODER B
-
-    static void beginEncoder_I01_A_Falling() // Encoder A PNP
-    {
-        attachInterrupt(digitalPinToInterrupt(EXTI_01), Encoder_I01_A, FALLING);
-    }
-    static void Encoder_I01_A(void)
-    {
-        noInterrupts();
-        _input_00 = digitalRead(EXTI_01);
-        _aStateEncoder_I01_A = _input_00;
-        _input_01 = digitalRead(EXTI_02);
-
-        if (_input_01 != _aStateEncoder_I01_A)
-        {
-            _pulsesEncoder_I01_I02++; // CW
-        }
-        else
-        {
-            _pulsesEncoder_I01_I02--; // CCW
-        }
-
-        interrupts();
-    }
-
-    /////////////////////////////////////////////////// ENCODER EXTI03 & EXTI04 //////////////////////////////////////////////////////////////////
-    // EXTI03 -> ENCODER A
-    // EXTI04 -> ENCODER B
-
-    static void beginEncoder_I03_A_Falling() // Encoder A PNP
-    {
-        attachInterrupt(digitalPinToInterrupt(EXTI_03), Encoder_I03_A, FALLING);
-    }
-    static void Encoder_I03_A(void)
-    {
-        noInterrupts();
-        _input_02 = digitalRead(EXTI_03);
-        _aStateEncoder_I03_A = _input_02;
-        _input_03 = digitalRead(EXTI_04);
-
-        if (_input_03 != _aStateEncoder_I03_A)
-        {
-            _pulsesEncoder_I03_I04++; // CW
-        }
-        else
-        {
-            _pulsesEncoder_I03_I04--; // CCW
-        }
-
-        interrupts();
-    }
-
-    /////////////////////////////////////////////////// ENCODER EXTI05 & EXTI06 //////////////////////////////////////////////////////////////////
-    // EXTI05 -> ENCODER A
-    // EXTI06 -> ENCODER B
-
-    static void beginEncoder_I05_A_Falling() // Encoder A PNP
-    {
-        attachInterrupt(digitalPinToInterrupt(EXTI_05), Encoder_I05_A, FALLING);
-    }
-    static void Encoder_I05_A(void)
-    {
-        noInterrupts();
-        _input_04 = digitalRead(EXTI_05);
-        _aStateEncoder_I05_A = _input_04;
-        _input_05 = digitalRead(EXTI_06);
-
-        if (_input_05 != _aStateEncoder_I05_A)
-        {
-            _pulsesEncoder_I05_I06++; // CW
-        }
-        else
-        {
-            _pulsesEncoder_I05_I06--; // CCW
-        }
-
-        interrupts();
-    }
-
-    /////////////////////////////////////////////////// ENCODER EXTI07 & EXTI08 //////////////////////////////////////////////////////////////////
-    // EXTI07 -> ENCODER A
-    // EXTI08 -> ENCODER B
-
-    static void beginEncoder_I07_A_Falling() // Encoder A PNP
-    {
-        attachInterrupt(digitalPinToInterrupt(EXTI_07), Encoder_I07_A, FALLING);
-    }
-    static void Encoder_I07_A(void)
-    {
-        noInterrupts();
-        _input_06 = digitalRead(EXTI_07);
-        _aStateEncoder_I07_A = _input_06;
-        _input_07 = digitalRead(EXTI_08);
-
-        if (_input_07 != _aStateEncoder_I07_A)
-        {
-            _pulsesEncoder_I07_I08++; // CW
-        }
-        else
-        {
-            _pulsesEncoder_I07_I08--; // CCW
-        }
-
-        interrupts();
-    }
     void begin(void);
     void updateDigitalInputsLeds();                                                                            // Atualiza os valores dos LEDs
     void beginEncoder(uint8_t encoder, bool sensorType);                                                       // Inicia o encoder
@@ -584,7 +141,18 @@ public:
     void testDigitalInputs();
     void allLedsOff();
 
+
+
+
+    void beginUserInterruptInput(uint8_t _pin);
+    void beginInterruptInput(uint8_t _pin, bool _count_mode);
+    void interruptInput(uint8_t _pin, bool _count_mode);
+    
+
 private:
+    callback_function_t _userFunction;
+    static industrialli_digitalInputsHub *instance;
+
     uint8_t _pin;
     uint8_t _ledStatus[8] = {
         _ledStatus[0] = 1,
