@@ -4,10 +4,10 @@ industrialli_hub hub;
 
 void setup(){
 	hub.begin();
-
+	
     digInHub.begin();
-    digInHub.beginDigitalInputCounting(I03, NPN, UP);
-	digInHub.beginDigitalInputCounting(I04, PNP, UP);
+    digInHub.begin_digital_input_counting(I03, NPN, UP);
+	digInHub.begin_digital_input_counting(I04, PNP, UP);
 
     anlgInHub.begin();  
     anlgInHub.setAnalogResolution(BITS_12);
@@ -26,18 +26,20 @@ void loop() {
 	uint8_t payload_request[MAX_PAYLOAD_SIZE];
 	uint8_t size_request;
 
+	digInHub.update_leds();
+
 	if(lora.ReceivePacketCommand(&id_request, &cmd_request, payload_request, &size_request, 10)){
 		if(cmd_request == 0x05){
-            uint8_t payload_response[2] = {digInHub.getCountVal(I03), (uint8_t)(anlgInHub.get020mA(A01) * 10)};
+            uint8_t payload_response[2] = {digInHub.get_count(I03), (uint8_t)(anlgInHub.get020mA(A01) * 10)};
 
-			Serial.println(digInHub._count_00);
-			Serial.println(digInHub._count_01);
-			Serial.println(digInHub._count_02);
-			Serial.println(digInHub._count_03);
-			Serial.println(digInHub._count_04);
-			Serial.println(digInHub._count_05);
-			Serial.println(digInHub._count_06);
-			Serial.println(digInHub._count_07);
+			Serial.println(digInHub.get_count(I01));
+			Serial.println(digInHub.get_count(I02));
+			Serial.println(digInHub.get_count(I03));
+			Serial.println(digInHub.get_count(I04));
+			Serial.println(digInHub.get_count(I05));
+			Serial.println(digInHub.get_count(I06));
+			Serial.println(digInHub.get_count(I07));
+			Serial.println(digInHub.get_count(I08));
 			
 
             lora.PrepareFrameCommand(0, 0x05, payload_response, 2);
@@ -45,6 +47,6 @@ void loop() {
         }
 	}
     
-    digInHub.updateDigitalInputsLeds();
+    
     leds.update();
 }
