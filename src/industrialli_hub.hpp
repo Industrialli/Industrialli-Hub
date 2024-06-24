@@ -26,7 +26,7 @@ Industrialli_Modbus_RTU_Client modbus_client;
 industrialli_digitalInputsHub digInHub;
 industrialli_analogInputsHub anlgInHub;
 LoRaMESH lora(&lora_serial);
-EasyNex nextion(&nextion_serial);
+// EasyNex nextion(&nextion_serial);
 
 class industrialli_hub{
     public:

@@ -32,18 +32,18 @@ extern industrialli_leds leds;
 
 class industrialli_analogInputsHub{
 public:
-    void begin(void);
+    void begin();
     void setAnalogResolution(int anlgRes);
     void setReadMode(uint8_t anlgPin, uint8_t readMode);
     int readRawInput(uint8_t anlgPin);
-    int getVRefRaw(void);
+    int getVRefRaw();
     double getVIN(uint8_t anlgPin);
     double get010V(uint8_t anlgPin);
     double get020mA(uint8_t anlgPin);
     bool alarm020mA(float alarm020Val, float threshold);
-    int getIntParamVREF(void);
-    int getIntParamTSCAL1(void);
-    int getIntParamTSCAL2(void);
+    int getIntParamVREF();
+    int getIntParamTSCAL1();
+    int getIntParamTSCAL2();
     void test010V();
     void test020mA();
 

@@ -134,218 +134,122 @@ void industrialli_digitalInputsHub::set_all_leds_off(){
     }
 }
 
-// /////////////////////////////////////////////////// ENCODER EXTI01 & EXTI02 //////////////////////////////////////////////////////////////////
-// // EXTI01 -> ENCODER A
-// // EXTI02 -> ENCODER B
-
-// static void beginEncoder_I01_A_Falling() // Encoder A PNP
-// {
-//     attachInterrupt(digitalPinToInterrupt(EXTI_01), Encoder_I01_A, FALLING);
-// }
-// static void Encoder_I01_A(void)
-// {
-//     noInterrupts();
-//     _input_00 = digitalRead(EXTI_01);
-//     _aStateEncoder_I01_A = _input_00;
-//     _input_01 = digitalRead(EXTI_02);
-
-//     if (_input_01 != _aStateEncoder_I01_A)
-//     {
-//         _pulsesEncoder_I01_I02++; // CW
-//     }
-//     else
-//     {
-//         _pulsesEncoder_I01_I02--; // CCW
-//     }
-
-//     interrupts();
-// }
-
-// /////////////////////////////////////////////////// ENCODER EXTI03 & EXTI04 //////////////////////////////////////////////////////////////////
-// // EXTI03 -> ENCODER A
-// // EXTI04 -> ENCODER B
-
-// static void beginEncoder_I03_A_Falling() // Encoder A PNP
-// {
-//     attachInterrupt(digitalPinToInterrupt(EXTI_03), Encoder_I03_A, FALLING);
-// }
-// static void Encoder_I03_A(void)
-// {
-//     noInterrupts();
-//     _input_02 = digitalRead(EXTI_03);
-//     _aStateEncoder_I03_A = _input_02;
-//     _input_03 = digitalRead(EXTI_04);
-
-//     if (_input_03 != _aStateEncoder_I03_A)
-//     {
-//         _pulsesEncoder_I03_I04++; // CW
-//     }
-//     else
-//     {
-//         _pulsesEncoder_I03_I04--; // CCW
-//     }
-
-//     interrupts();
-// }
-
-// /////////////////////////////////////////////////// ENCODER EXTI05 & EXTI06 //////////////////////////////////////////////////////////////////
-// // EXTI05 -> ENCODER A
-// // EXTI06 -> ENCODER B
-
-// static void beginEncoder_I05_A_Falling() // Encoder A PNP
-// {
-//     attachInterrupt(digitalPinToInterrupt(EXTI_05), Encoder_I05_A, FALLING);
-// }
-// static void Encoder_I05_A(void)
-// {
-//     noInterrupts();
-//     _input_04 = digitalRead(EXTI_05);
-//     _aStateEncoder_I05_A = _input_04;
-//     _input_05 = digitalRead(EXTI_06);
-
-//     if (_input_05 != _aStateEncoder_I05_A)
-//     {
-//         _pulsesEncoder_I05_I06++; // CW
-//     }
-//     else
-//     {
-//         _pulsesEncoder_I05_I06--; // CCW
-//     }
-
-//     interrupts();
-// }
-
-/////////////////////////////////////////////////// ENCODER EXTI07 & EXTI08 //////////////////////////////////////////////////////////////////
-// EXTI07 -> ENCODER A
-// EXTI08 -> ENCODER B
-
-// static void beginEncoder_I07_A_Falling() // Encoder A PNP
-// {
-//     attachInterrupt(digitalPinToInterrupt(EXTI_07), Encoder_I07_A, FALLING);
-// }
-// static void Encoder_I07_A(void)
-// {
-//     noInterrupts();
-//     _input_06 = digitalRead(EXTI_07);
-//     _aStateEncoder_I07_A = _input_06;
-//     _input_07 = digitalRead(EXTI_08);
-
-//     if (_input_07 != _aStateEncoder_I07_A)
-//     {
-//         _pulsesEncoder_I07_I08++; // CW
-//     }
-//     else
-//     {
-//         _pulsesEncoder_I07_I08--; // CCW
-//     }
-
-//     interrupts();
-// }
-
-// void industrialli_digitalInputsHub::beginEncoder(uint8_t encoder, bool sensorType){
-//     _encoder = encoder;
-
-//     if (sensorType == PNP)
-//         switch (_encoder)
-//         {
-//         case 0:
-//             pinMode(EXTI_01, INPUT);
-//             pinMode(EXTI_02, INPUT);
-//             _sensorType[0] = sensorType;
-//             _sensorType[1] = sensorType;
-//             _input_00 = digitalRead(EXTI_01);
-//             _input_01 = digitalRead(EXTI_02);
-//             beginEncoder_I01_A_Falling();
-//             break;
-//         case 1:
-//             pinMode(EXTI_03, INPUT);
-//             pinMode(EXTI_04, INPUT);
-//             _sensorType[2] = sensorType;
-//             _sensorType[3] = sensorType;
-//             _input_02 = digitalRead(EXTI_03);
-//             _input_02 = digitalRead(EXTI_04);
-//             beginEncoder_I03_A_Falling();
-//             break;
-//         case 2:
-//             pinMode(EXTI_05, INPUT);
-//             pinMode(EXTI_06, INPUT);
-//             _sensorType[4] = sensorType;
-//             _sensorType[5] = sensorType;
-//             _input_04 = digitalRead(EXTI_05);
-//             _input_02 = digitalRead(EXTI_06);
-//             beginEncoder_I05_A_Falling();
-//             break;
-//         case 3:
-//             pinMode(EXTI_07, INPUT);
-//             pinMode(EXTI_08, INPUT);
-//             _sensorType[6] = sensorType;
-//             _sensorType[7] = sensorType;
-//             _input_06 = digitalRead(EXTI_07);
-//             _input_02 = digitalRead(EXTI_08);
-//             beginEncoder_I07_A_Falling();
-//             break;
-
-//         default:
-//             break;
-//         }
-// }
-
-// int industrialli_digitalInputsHub::getPulsesEncoder(uint8_t encoder){
-//     _encoder = encoder;
-
-//     switch (_encoder){
-//     case 0:
-//         return _pulsesEncoder_I01_I02;
-//         break;
-//     case 1:
-//         return _pulsesEncoder_I03_I04;
-//         break;
-//     case 2:
-//         return _pulsesEncoder_I05_I06;
-//         break;
-//     case 3:
-//         return _pulsesEncoder_I07_I08;
-//         break;
-
-//     default:
-//         return -1;
-//         break;
-//     }
-// }
-
-// void industrialli_digitalInputsHub::beginUserDigitalInput(uint8_t pin, callback_function_t userFunction, uint32_t mode, bool sensorType){
-//     _pin              = pin - 1;
-//     _userMode         = mode;
-//     _userFunction     = userFunction;
-//     _sensorType[_pin] = sensorType;
+void industrialli_digitalInputsHub::begin_encoder_counting(uint8_t _encoder, bool _sensor_type){
+    switch (_encoder){
+        case 0:
+            sensor_type[0] = _sensor_type;
+            sensor_type[1] = _sensor_type;
+            break;
+        case 1:
+            sensor_type[2] = _sensor_type;
+            sensor_type[3] = _sensor_type;
+            break;
+        case 2:
+            sensor_type[4] = _sensor_type;
+            sensor_type[5] = _sensor_type;
+            break;
+        case 3:
+            sensor_type[6] = _sensor_type;
+            sensor_type[7] = _sensor_type;
+            break;
+    }
     
-//     switch (_pin){
-//         case 0:
-//             beginUserInterruptInput_00();
-//             break;
-//         case 1:
-//             beginUserInterruptInput_01();
-//             break;
-//         case 2:
-//             beginUserInterruptInput_02();
-//             break;
-//         case 3:
-//             beginUserInterruptInput_03();
-//             break;
-//         case 4:
-//             beginUserInterruptInput_04();
-//             break;
-//         case 5:
-//             beginUserInterruptInput_05();
-//             break;
-//         case 6:
-//             beginUserInterruptInput_06();
-//             break;
-//         case 7:
-//             beginUserInterruptInput_07();
-//             break;
+    begin_interrupt_encoder(_encoder, _sensor_type);
+}
 
-//         default:
-//             break;
-//     }
-// }
+void industrialli_digitalInputsHub::begin_interrupt_encoder(uint8_t _encoder, bool _sensor_type){
+    switch (_encoder){
+        case 0:
+            attachInterrupt(digitalPinToInterrupt(EXTI_01), [this, _encoder]() {
+                this->count_encoder_interruption(_encoder);
+            }, FALLING);
+            break;
+        case 1:
+            attachInterrupt(digitalPinToInterrupt(EXTI_03), [this, _encoder]() {
+                this->count_encoder_interruption(_encoder);
+            }, FALLING);
+            break;
+        case 2:
+            attachInterrupt(digitalPinToInterrupt(EXTI_05), [this, _encoder]() {
+                this->count_encoder_interruption(_encoder);
+            }, FALLING);
+            break;
+        case 3:
+            attachInterrupt(digitalPinToInterrupt(EXTI_07), [this, _encoder]() {
+                this->count_encoder_interruption(_encoder);
+            }, FALLING);
+            break;
+    }
+
+    
+}
+
+void industrialli_digitalInputsHub::count_encoder_interruption(uint8_t _encoder){
+    noInterrupts();
+
+    switch(_encoder){
+        case 0:
+            encoder_a = digitalRead(EXTI_01);
+            encoder_b = digitalRead(EXTI_02);
+
+            if (encoder_a != encoder_b){
+                count[0]++;
+        
+            }else{
+                count[0]--;
+            }
+            break;
+        case 1:
+            encoder_a = digitalRead(EXTI_03);
+            encoder_b = digitalRead(EXTI_04);
+
+            if (encoder_a != encoder_b){
+                count[2]++;
+        
+            }else{
+                count[2]--;
+            }
+            break;
+        case 2:
+            encoder_a = digitalRead(EXTI_05);
+            encoder_b = digitalRead(EXTI_06);
+
+            if (encoder_a != encoder_b){
+                count[4]++;
+        
+            }else{
+                count[4]--;
+            }
+            break;
+        case 3:
+            encoder_a = digitalRead(EXTI_07);
+            encoder_b = digitalRead(EXTI_08);
+
+            if (encoder_a != encoder_b){
+                count[6]++;
+        
+            }else{
+                count[6]--;
+            }
+            break;
+    }
+
+    interrupts();
+}
+
+int industrialli_digitalInputsHub::get_pulses_encoder(uint8_t _encoder){
+    switch (_encoder){
+        case 0:
+            return count[0];
+            break;
+        case 1:
+            return count[2];
+            break;
+        case 2:
+            return count[4];
+            break;
+        case 3:
+            return count[6];
+            break;
+    }
+}
