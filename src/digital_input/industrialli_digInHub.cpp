@@ -17,6 +17,13 @@ void industrialli_digitalInputsHub::begin(){
         count[i]       = 0;
     }
 
+    for (size_t i = 0; i < 4; i++){
+        encoder_sense[i]       = true;
+        encoder_velocity[i]    = 0;
+        encoder_last_update[i] = 0;
+    }
+    
+
     set_all_leds_off();
 }
 
@@ -192,44 +199,64 @@ void industrialli_digitalInputsHub::count_encoder_interruption(uint8_t _encoder)
             encoder_a = digitalRead(EXTI_01);
             encoder_b = digitalRead(EXTI_02);
 
+            encoder_velocity[0]    = 150.0 / abs((int)encoder_last_update[0] - (int)millis());
+            encoder_last_update[0] = millis();
+
             if (encoder_a != encoder_b){
                 count[0]++;
+                encoder_sense[0] = true;
         
             }else{
                 count[0]--;
+                encoder_sense[0] = false;
             }
             break;
         case 1:
             encoder_a = digitalRead(EXTI_03);
             encoder_b = digitalRead(EXTI_04);
 
+            encoder_velocity[1]    = 150.0 / abs((int)encoder_last_update[1] - (int)millis());
+            encoder_last_update[1] = millis();
+
             if (encoder_a != encoder_b){
                 count[2]++;
+                encoder_sense[1] = true;
         
             }else{
                 count[2]--;
+                encoder_sense[1] = false;
             }
             break;
         case 2:
             encoder_a = digitalRead(EXTI_05);
             encoder_b = digitalRead(EXTI_06);
 
+            encoder_velocity[2]    = 150.0 / abs((int)encoder_last_update[2] - (int)millis());
+            encoder_last_update[2] = millis();
+
             if (encoder_a != encoder_b){
                 count[4]++;
+                encoder_sense[2] = true;
         
             }else{
                 count[4]--;
+                encoder_sense[2] = false;
             }
             break;
         case 3:
             encoder_a = digitalRead(EXTI_07);
             encoder_b = digitalRead(EXTI_08);
 
+            encoder_velocity[3]    = 150.0 / abs((int)encoder_last_update[3] - (int)millis());
+            encoder_last_update[3] = millis();
+
             if (encoder_a != encoder_b){
                 count[6]++;
+                encoder_sense[3] = true;
         
             }else{
                 count[6]--;
+                encoder_sense[3] = false;
             }
             break;
     }
@@ -252,4 +279,12 @@ int industrialli_digitalInputsHub::get_pulses_encoder(uint8_t _encoder){
             return count[6];
             break;
     }
+}
+
+bool industrialli_digitalInputsHub::get_encoder_sense(uint8_t _encoder){
+    return encoder_sense[_encoder];
+}
+
+double industrialli_digitalInputsHub::get_encoder_velocity(uint8_t _encoder){
+    return encoder_velocity[_encoder];
 }

@@ -3,6 +3,7 @@
 
 #include <Arduino.h>
 #include <stdlib.h>
+#include <math.h>
 #include "leds/industrialli_leds.h"
 
 extern industrialli_leds leds;
@@ -55,6 +56,8 @@ public:
     void begin_interrupt_encoder(uint8_t _encoder, bool _sensor_type);
     void count_encoder_interruption(uint8_t _encoder);
     int get_pulses_encoder(uint8_t _encoder);
+    bool get_encoder_sense(uint8_t _encoder);
+    double get_encoder_velocity(uint8_t _encoder);
     
 private:
     uint8_t led_status[8];
@@ -64,6 +67,9 @@ private:
 
     volatile int encoder_a;
     volatile int encoder_b;
+    volatile bool encoder_sense[4];
+    volatile double encoder_velocity[4];
+    volatile uint32_t encoder_last_update[4];
 };
 
 #endif
