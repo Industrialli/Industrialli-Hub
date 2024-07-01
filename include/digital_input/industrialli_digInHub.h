@@ -70,6 +70,7 @@ private:
     volatile bool encoder_sense[4];
     volatile double encoder_velocity[4];
     volatile uint32_t encoder_last_update[4];
+    volatile uint32_t encoder_last_count[4];
 };
 
 #endif

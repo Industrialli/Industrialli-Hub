@@ -21,6 +21,7 @@ void industrialli_digitalInputsHub::begin(){
         encoder_sense[i]       = true;
         encoder_velocity[i]    = 0;
         encoder_last_update[i] = 0;
+        encoder_last_count[i]  = 0;
     }
     
 
@@ -199,8 +200,11 @@ void industrialli_digitalInputsHub::count_encoder_interruption(uint8_t _encoder)
             encoder_a = digitalRead(EXTI_01);
             encoder_b = digitalRead(EXTI_02);
 
-            encoder_velocity[0]    = 150.0 / abs((int)encoder_last_update[0] - (int)millis());
-            encoder_last_update[0] = millis();
+            if(encoder_last_update[0] - millis() >= 100){
+                encoder_velocity[0]    = (60000.0 * abs((int32_t)encoder_last_count[0] - count[0])) / (400.0 * abs((int32_t)encoder_last_update[0] - (int32_t)millis()));
+                encoder_last_update[0] = millis();
+                encoder_last_count[0]  = count[0];
+            }
 
             if (encoder_a != encoder_b){
                 count[0]++;
