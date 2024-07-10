@@ -200,7 +200,7 @@ void industrialli_digitalInputsHub::count_encoder_interruption(uint8_t _encoder)
             encoder_a = digitalRead(EXTI_01);
             encoder_b = digitalRead(EXTI_02);
 
-            if(encoder_last_update[0] - millis() >= 100){
+            if(encoder_last_update[0] - millis() >= 150){
                 encoder_velocity[0]    = (60000.0 * abs((int32_t)encoder_last_count[0] - count[0])) / (400.0 * abs((int32_t)encoder_last_update[0] - (int32_t)millis()));
                 encoder_last_update[0] = millis();
                 encoder_last_count[0]  = count[0];
@@ -219,8 +219,11 @@ void industrialli_digitalInputsHub::count_encoder_interruption(uint8_t _encoder)
             encoder_a = digitalRead(EXTI_03);
             encoder_b = digitalRead(EXTI_04);
 
-            encoder_velocity[1]    = 150.0 / abs((int)encoder_last_update[1] - (int)millis());
-            encoder_last_update[1] = millis();
+            if(encoder_last_update[1] - millis() >= 150){
+                encoder_velocity[1]    = (60000.0 * abs((int32_t)encoder_last_count[1] - count[1])) / (400.0 * abs((int32_t)encoder_last_update[1] - (int32_t)millis()));
+                encoder_last_update[1] = millis();
+                encoder_last_count[1]  = count[1];
+            }
 
             if (encoder_a != encoder_b){
                 count[2]++;
@@ -235,8 +238,11 @@ void industrialli_digitalInputsHub::count_encoder_interruption(uint8_t _encoder)
             encoder_a = digitalRead(EXTI_05);
             encoder_b = digitalRead(EXTI_06);
 
-            encoder_velocity[2]    = 150.0 / abs((int)encoder_last_update[2] - (int)millis());
-            encoder_last_update[2] = millis();
+            if(encoder_last_update[2] - millis() >= 150){
+                encoder_velocity[2]    = (60000.0 * abs((int32_t)encoder_last_count[2] - count[2])) / (400.0 * abs((int32_t)encoder_last_update[2] - (int32_t)millis()));
+                encoder_last_update[2] = millis();
+                encoder_last_count[2]  = count[2];
+            }
 
             if (encoder_a != encoder_b){
                 count[4]++;
@@ -251,8 +257,10 @@ void industrialli_digitalInputsHub::count_encoder_interruption(uint8_t _encoder)
             encoder_a = digitalRead(EXTI_07);
             encoder_b = digitalRead(EXTI_08);
 
-            encoder_velocity[3]    = 150.0 / abs((int)encoder_last_update[3] - (int)millis());
-            encoder_last_update[3] = millis();
+            if(encoder_last_update[3] - millis() >= 150){
+                encoder_last_update[3] = millis();
+                encoder_last_count[3]  = count[3];
+            }
 
             if (encoder_a != encoder_b){
                 count[6]++;
