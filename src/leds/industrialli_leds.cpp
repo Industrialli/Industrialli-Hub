@@ -1,13 +1,11 @@
 #include "leds/industrialli_leds.h"
 
 void industrialli_leds::begin(){
-    pinMode(SPI1_NSS, OUTPUT);
-    
-    spi_leds.setMISO(SPI1_MISO);
-    spi_leds.setMOSI(SPI1_MOSI);
-    spi_leds.setSCLK(SPI1_SCK);
-    spi_leds.begin();
-    spi_leds.beginTransaction(SPISettings(2000000UL, LSBFIRST, SPI_MODE0));
+    GPIO_InitTypeDef GPIO_InitStruct = {0};
+    GPIO_InitStruct.Pin  = SPI1_NSS_PA4_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(SPI1_NSS_PA4_GPIO_Port, &GPIO_InitStruct);
 
     start();
 }
@@ -17,14 +15,14 @@ void industrialli_leds::start(){
         set_all(LOW);
         set_led(i, HIGH);
         update();
-        delay(25);
+        HAL_Delay(25);
     }
     
     for (int i = 31; i >= 0; i--){
         set_all(LOW);
         set_led(i, HIGH);
         update();
-        delay(25);
+        HAL_Delay(25);
     }
 
     set_all(LOW);
@@ -44,10 +42,17 @@ void industrialli_leds::set_all(bool _value){
 }
 
 void industrialli_leds::update(){
-    digitalWrite(SPI1_NSS, LOW);
-    spi_leds.transfer(leds >> 24);
-    spi_leds.transfer(leds >> 16);
-    spi_leds.transfer(leds >> 8);
-    spi_leds.transfer(leds & 0xFF);
-    digitalWrite(SPI1_NSS, HIGH);
+    HAL_GPIO_WritePin(SPI1_NSS_PA4_GPIO_Port, SPI1_NSS_PA4_Pin, GPIO_PIN_RESET);
+
+    uint8_t a = (leds >> 24);
+    uint8_t b = (leds >> 16);
+    uint8_t c = (leds >> 8);
+    uint8_t d = (leds & 0xFF);
+
+    HAL_SPI_Transmit(&hspi1, &a, 1, 1);
+    HAL_SPI_Transmit(&hspi1, &b, 1, 1);
+    HAL_SPI_Transmit(&hspi1, &c, 1, 1);
+    HAL_SPI_Transmit(&hspi1, &d, 1, 1);
+    
+    HAL_GPIO_WritePin(SPI1_NSS_PA4_GPIO_Port, SPI1_NSS_PA4_Pin, GPIO_PIN_SET);
 }

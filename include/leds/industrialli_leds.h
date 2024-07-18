@@ -1,14 +1,14 @@
 #ifndef INDUSTRIALLI_LEDS_H
 #define INDUSTRIALLI_LEDS_H
 
-#include <SPI.h>
-
 #define SPI1_NSS PA4
 #define SPI1_SCK PA5
 #define SPI1_MISO PA6
 #define SPI1_MOSI PA7
 
-extern SPIClass spi_leds;
+#include "main.h"
+
+extern SPI_HandleTypeDef hspi1;
 
 class industrialli_leds{
 public:
