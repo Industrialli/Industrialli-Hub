@@ -3,7 +3,7 @@
 
 #include "leds/industrialli_leds.h"
 
-enum DIGITAL_PIN {
+enum DIGITAL_OUTPUT_PIN {
     Q01 = 1,
     Q02 = 2,
     Q03 = 3,
@@ -33,7 +33,7 @@ public:
     void disable();
     void update();
 
-    void write(DIGITAL_PIN _pin, bool _value);
+    void write(DIGITAL_OUTPUT_PIN _pin, bool _value);
     
     void update_power_leds_status();
 

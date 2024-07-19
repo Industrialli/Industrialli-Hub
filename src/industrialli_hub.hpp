@@ -2,7 +2,7 @@
 #include "leds/industrialli_leds.h"
 // #include "loramesh/industrialli_loramesh.h"
 #include "digital_output/industrialli_digital_output.h"
-// #include "digital_input/industrialli_digInHub.h"
+#include "digital_input/industrialli_digital_input.h"
 #include "analog_input/industrialli_analog_input.h"
 // #include "nextion/industrialli_nextion.h"
 // #include "modbus/industrialli_modbus_rtu_client.h"
@@ -34,7 +34,7 @@ industrialli_leds leds;
 industrialli_digital_output digital_output;
 // Industrialli_Modbus_RTU_Server modbus_server;
 // Industrialli_Modbus_RTU_Client modbus_client;
-// industrialli_digitalInputsHub digInHub;
+industrialli_digital_input digital_input;
 industrialli_analog_input analog_input;
 // LoRaMESH lora(&lora_serial);
 // EasyNex nextion(&nextion_serial);
@@ -213,6 +213,51 @@ static void MX_GPIO_Init(){
   GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+}
+
+void HAL_GPIO_EXTI_Callback(uint16_t GPIO_Pin){
+    switch (GPIO_Pin){
+        case EXTI_01_PE15_Pin:
+            if(digital_input.gpio_irq_conf[0].callback){
+                digital_input.gpio_irq_conf[0].callback();
+            }
+            break;
+        case EXTI_02_PE14_Pin:
+            if(digital_input.gpio_irq_conf[1].callback){
+                digital_input.gpio_irq_conf[1].callback();
+            }
+            break;
+        case EXTI_03_PE13_Pin:
+            if(digital_input.gpio_irq_conf[2].callback){
+                digital_input.gpio_irq_conf[2].callback();
+            }
+            break;
+        case EXTI_04_PE12_Pin:
+            if(digital_input.gpio_irq_conf[3].callback){
+                digital_input.gpio_irq_conf[3].callback();
+            }
+            break;
+        case EXTI_05_PB4_Pin:
+            if(digital_input.gpio_irq_conf[4].callback){
+                digital_input.gpio_irq_conf[4].callback();
+            }
+            break;
+        case EXTI_06_PB5_Pin:
+            if(digital_input.gpio_irq_conf[5].callback){
+                digital_input.gpio_irq_conf[5].callback();
+            }
+            break;
+        case EXTI_07_PB6_Pin:
+            if(digital_input.gpio_irq_conf[6].callback){
+                digital_input.gpio_irq_conf[6].callback();
+            }
+            break;
+        case EXTI_08_PB7_Pin:
+            if(digital_input.gpio_irq_conf[7].callback){
+                digital_input.gpio_irq_conf[7].callback();
+            }
+            break;
+    }
 }
 
 static void MX_DMA_Init(){

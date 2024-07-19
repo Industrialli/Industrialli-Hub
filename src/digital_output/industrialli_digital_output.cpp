@@ -32,7 +32,7 @@ void industrialli_digital_output::update(){
     leds.update();
 }
 
-void industrialli_digital_output::write(DIGITAL_PIN _pin, bool _value){
+void industrialli_digital_output::write(DIGITAL_OUTPUT_PIN _pin, bool _value){
     if(_value){
         digital_outputs |= 0x01 << (_pin - 1);
     }else {
