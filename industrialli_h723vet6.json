@@ -1,0 +1,43 @@
+{
+  "build": {
+    "arduino": {
+      "variant_h": "variant_industrialli_h723vet6.h"
+    },
+    "core": "stm32",
+    "cpu": "cortex-m7",
+    "extra_flags": "-DSTM32H7xx -DSTM32H723xx",
+    "f_cpu": "550000000L",
+    "framework_extra_flags": {
+      "arduino": "-DCUSTOM_PERIPHERAL_PINS"
+    },
+    "mcu": "stm32h723vet6",
+    "product_line": "STM32H723xx",
+    "variant": "STM32H7xx/H723V(E-G)(H-T)_H730VB(H-T)_H733VG(H-T)"
+  },
+  "debug": {
+    "jlink_device": "STM32H723VE",
+    "openocd_target": "stm32h7x",
+    "svd_path": "STM32H723.svd"
+  },
+  "frameworks": [
+    "arduino",
+    "cmsis",
+    "stm32cube",
+    "libopencm3"
+  ],
+  "name": "Industrialli STM32H723VET6",
+  "upload": {
+    "maximum_ram_size": 327680,
+    "maximum_size": 524288,
+    "protocol": "stlink",
+    "protocols": [
+      "cmsis-dap",
+      "dfu",
+      "jlink",
+      "stlink",
+      "mbed"
+    ]
+  },
+  "url": "https://www.st.com/en/microcontrollers/stm32f407vg.html",
+  "vendor": "ST"
+}
