@@ -1,30 +1,38 @@
 #ifndef INDUSTRIALLI_ANALOG_INPUT_H
 #define INDUSTRIALLI_ANALOG_INPUT_H
 
+#include <Arduino.h>
 #include "leds/industrialli_leds.h"
 
-extern ADC_HandleTypeDef hadc3;
-extern uint16_t analog_input_values[4];
 extern industrialli_leds leds;
 
-enum ANALOG_PIN {A01 = 0, A02 = 1, A03 = 2, A04 = 3};
-enum INPUT_VOLTAGE {INPUT_VOLTAGE_10V = 0, INPUT_VOLTAGE_20V = 1};
+typedef struct {
+    uint32_t port;
+    uint32_t sel;
+    uint8_t read_mode;
+} analog_input_struct;
+
+#define A01 0
+#define A02 1
+#define A03 2
+#define A04 3
+
+#define READ_10V 0
+#define READ_20mA 1
 
 class industrialli_analog_input{
-private:
-    uint8_t pin_input_voltage[4];
-    uint8_t resolution;
+public:
+    void begin();
+    void set_read_mode(uint8_t _pin, uint8_t _read_mode);
+    void set_resolution(uint16_t _resolution);
+    double analog_read(uint8_t _pin);
 
+private:
+    analog_input_struct analog_input[4];
     uint16_t bits_resolution;
 
     uint16_t get_vrefint_cal();
     uint16_t get_vrefint_data();
-    // bool alarm020mA(float alarm020Val, float threshold);
-
-public:
-    void begin();
-    void set_input_voltage(ANALOG_PIN _pin, INPUT_VOLTAGE _input_voltage);
-    double analog_read(ANALOG_PIN _pin);
 };
 
 #endif

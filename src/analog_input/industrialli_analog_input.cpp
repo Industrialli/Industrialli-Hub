@@ -1,80 +1,65 @@
 #include "analog_input/industrialli_analog_input.h"
 
-uint16_t industrialli_analog_input::get_vrefint_cal(){
-    return *((uint16_t *)0x1FF1E860);
-}
-
-uint16_t industrialli_analog_input::get_vrefint_data(){
-    __IO uint16_t vrefint_data = 0;
-    
-    if(HAL_ADCEx_Calibration_Start(&hadc3, ADC_CALIB_OFFSET, ADC_SINGLE_ENDED) != HAL_OK){
-		Error_Handler();
-	}
-
-    if (HAL_ADC_Start(&hadc3) != HAL_OK){
-		Error_Handler();
-	}
-
-    if (HAL_ADC_PollForConversion(&hadc3, 10) != HAL_OK){
-        Error_Handler();
-    }
-
-    if ((HAL_ADC_GetState(&hadc3) & HAL_ADC_STATE_REG_EOC) == HAL_ADC_STATE_REG_EOC) {
-        vrefint_data = HAL_ADC_GetValue(&hadc3);
-    }
-
-    HAL_ADC_Stop(&hadc3);
-
-    return vrefint_data;
-}
-
 void industrialli_analog_input::begin(){
-    resolution      = 12;
-    bits_resolution = 4095;
+    analog_input[A01] = {PB1, PA9,  READ_10V};
+    analog_input[A02] = {PC5, PA10, READ_10V};
+    analog_input[A03] = {PC4, PD0,  READ_10V};
+    analog_input[A04] = {PA0, PD1,  READ_10V};
 
-    pin_input_voltage[A01] = INPUT_VOLTAGE_10V;
-    pin_input_voltage[A02] = INPUT_VOLTAGE_10V;
-    pin_input_voltage[A03] = INPUT_VOLTAGE_10V;
-    pin_input_voltage[A04] = INPUT_VOLTAGE_10V;
+    pinMode(analog_input[A01].port, INPUT);
+    pinMode(analog_input[A02].port, INPUT);
+    pinMode(analog_input[A03].port, INPUT);
+    pinMode(analog_input[A04].port, INPUT);
+
+    pinMode(analog_input[A01].sel, OUTPUT);
+    pinMode(analog_input[A02].sel, OUTPUT);
+    pinMode(analog_input[A03].sel, OUTPUT);
+    pinMode(analog_input[A04].sel, OUTPUT);
+
+    digitalWrite(analog_input[A01].sel, READ_10V);
+    digitalWrite(analog_input[A02].sel, READ_10V);
+    digitalWrite(analog_input[A03].sel, READ_10V);
+    digitalWrite(analog_input[A04].sel, READ_10V);
+
+    set_resolution(12);
 }
 
-void industrialli_analog_input::set_input_voltage(ANALOG_PIN _pin, INPUT_VOLTAGE _input_voltage){
-    switch(_pin){
-        case A01:
-            HAL_GPIO_WritePin(ANLG_SEL_01_PA9_GPIO_Port, ANLG_SEL_01_PA9_Pin, (GPIO_PinState)_input_voltage);
-            break;
-        case A02:
-            HAL_GPIO_WritePin(ANLG_SEL_02_PA10_GPIO_Port, ANLG_SEL_02_PA10_Pin, (GPIO_PinState)_input_voltage);
-            break;
-        case A03:
-            HAL_GPIO_WritePin(ANLG_SEL_03_PD0_GPIO_Port, ANLG_SEL_03_PD0_Pin, (GPIO_PinState)_input_voltage);
-            break;
-        case A04:
-            HAL_GPIO_WritePin(ANLG_SEL_04_PD1_GPIO_Port, ANLG_SEL_04_PD1_Pin, (GPIO_PinState)_input_voltage);
-            break;
-    }
-
-    pin_input_voltage[_pin] = _input_voltage;
+void industrialli_analog_input::set_read_mode(uint8_t _pin, uint8_t _read_mode){
+    digitalWrite(analog_input[_pin].sel, _read_mode);
+    analog_input[_pin].read_mode = _read_mode;
     leds.set_led(_pin, HIGH);
 }
 
-double industrialli_analog_input::analog_read(ANALOG_PIN _pin){
-    __IO double vdda = (3.3 * get_vrefint_cal()) / get_vrefint_data();
-    __IO double vchannel_internal = (vdda / bits_resolution) * analog_input_values[_pin];
-    __IO double vchannel_external;
+void industrialli_analog_input::set_resolution(uint16_t _resolution){
+    analogReadResolution(_resolution);
+    bits_resolution = (1 << _resolution) - 1;
+}
 
-    if(pin_input_voltage[_pin] == INPUT_VOLTAGE_10V){
+double industrialli_analog_input::analog_read(uint8_t _pin){
+    double vdda = (3.3 * get_vrefint_cal()) / get_vrefint_data();
+    double vchannel_internal = (vdda / bits_resolution) * analogRead(analog_input[_pin].port);
+    double vchannel_external;
+
+    if(analog_input[_pin].read_mode == READ_10V){
         vchannel_external = (10 * vchannel_internal) / 3.3;
     }
 
-    if(pin_input_voltage[_pin] == INPUT_VOLTAGE_20V){
+    if(analog_input[_pin].read_mode == READ_20mA){
         vchannel_external = (20 * vchannel_internal) / 3.3;
     }
 
     return vchannel_external;
 }
 
-// bool industrialli_analog_input::alarm020mA(float alarm020Val, float threshold){
+uint16_t industrialli_analog_input::get_vrefint_cal(){
+    return *((uint16_t *)0x1FF1E860);
+}
+
+uint16_t industrialli_analog_input::get_vrefint_data(){
+    return analogRead(AVREF);
+}
+
+// bool industrialli_analogInputsHub::alarm020mA(float alarm020Val, float threshold){
 //     _alarm020Val = alarm020Val;
    
 //     if (_alarm020Val < threshold){
@@ -87,3 +72,13 @@ double industrialli_analog_input::analog_read(ANALOG_PIN _pin){
 //     return _alarm;
 // }
 
+// int industrialli_analogInputsHub::getIntParamTSCAL1(){
+
+//     _TS_CAL1 = *((unsigned short *)0x1FF1E820); // TEMP_RAW1 = 3.3V@30degreeC
+//     return _TS_CAL1;
+// }
+
+// int industrialli_analogInputsHub::getIntParamTSCAL2(){
+//     _TS_CAL2 = *((unsigned short *)0x1FF1E840);
+//     return _TS_CAL2;
+// }
