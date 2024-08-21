@@ -10,7 +10,7 @@ void setup(){
 	digital_input.attach_interrupt(I01, I01_COUNTING_UP_CALLBACK, PNP);
 
     analog_input.begin();
-    analog_input.set_resolution(16);
+    analog_input.set_resolution(12);
     analog_input.set_read_mode(A01, READ_20mA);
 
 	lora.begin(false);
