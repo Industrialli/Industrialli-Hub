@@ -5,8 +5,8 @@
 
 // #define AIO_SERVER      "io.adafruit.com"
 // #define AIO_SERVERPORT  1883
-// #define AIO_USERNAME    "opallace"
-// #define AIO_KEY         "aio_nYnX78rnCd3h025W6nC5hXiTR0mU"
+// #define AIO_USERNAME    ""*************""
+// #define AIO_KEY         "*************"
 
 // uint8_t mac_address[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xED};
 // EthernetClient client;
