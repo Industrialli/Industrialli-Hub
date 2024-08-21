@@ -30,7 +30,7 @@ void loop() {
 		if(cmd_request == 0x05){
             
 			uint8_t payload_response[2] = {
-				i01_count, 
+				(uint8_t)i01_count, 
 				(uint8_t)(analog_input.analog_read(A01) * 10)
 			};
             
