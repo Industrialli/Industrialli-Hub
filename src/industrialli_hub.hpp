@@ -1,7 +1,4 @@
 #include <Arduino.h>
-#include <FreeRTOS.h>
-#include <semphr.h>
-#include <task.h>
 
 #include "leds/industrialli_leds.h"
 #include "loramesh/industrialli_loramesh.h"
@@ -32,7 +29,7 @@ industrialli_ethernet ethernet;
 industrialli_digital_input digital_input;
 industrialli_analog_input analog_input;
 LoRaMESH lora(&lora_serial);
-// EasyNex nextion(nextion_serial);
+EasyNex nextion(nextion_serial);
 
 class industrialli_hub{
     public:

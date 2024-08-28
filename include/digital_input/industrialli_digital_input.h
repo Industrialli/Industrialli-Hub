@@ -4,14 +4,19 @@
 #include <Arduino.h>
 #include "leds/industrialli_leds.h"
 
-#define I01 0
-#define I02 1
-#define I03 2
-#define I04 3
-#define I05 4
-#define I06 5
-#define I07 6
-#define I08 7
+#define A01 0
+#define A02 1
+#define A03 2
+#define A04 3
+
+#define I01 4
+#define I02 5
+#define I03 6
+#define I04 7
+#define I05 8
+#define I06 9
+#define I07 10
+#define I08 11
 
 #define PNP RISING
 #define NPN FALLING
@@ -21,16 +26,19 @@ extern industrialli_leds leds;
 typedef struct {
     uint32_t port;
     uint8_t read_mode;
+    uint8_t analog_as_digital;
 } digital_input_struct;
 
 class industrialli_digital_input{
 public:
     void begin();
-    void attach_interrupt(uint8_t _pin, void (*_callback)(), uint8_t _read_mode);
+    void attach_interrupt(uint8_t _pin, void (*_callback)(), uint32_t _read_mode);
+    int read(uint8_t _pin);
+    void enable_analog(uint8_t _pin);
     void update_leds();
 
 private:
-    digital_input_struct digital_input[8];
+    digital_input_struct digital_input[12];
 };
 
 

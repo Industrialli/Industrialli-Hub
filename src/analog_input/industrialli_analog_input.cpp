@@ -35,6 +35,16 @@ void industrialli_analog_input::set_resolution(uint16_t _resolution){
     bits_resolution = (1 << _resolution) - 1;
 }
 
+
+double industrialli_analog_input::map(double _value, double _in_min, double _in_max, double _out_min, double _out_max){
+    return (_value - _in_min) * (_out_max - _out_min) / (_in_max - _in_min) + _out_min; 
+}
+
+double industrialli_analog_input::map_pin(uint8_t _pin, double _in_min, double _in_max, double _out_min, double _out_max){
+    double value = analog_read(_pin);
+    return (value - _in_min) * (_out_max - _out_min) / (_in_max - _in_min) + _out_min; 
+}
+
 double industrialli_analog_input::analog_read(uint8_t _pin){
     double vdda = (3.3 * get_vrefint_cal()) / get_vrefint_data();
     double vchannel_internal = (vdda / bits_resolution) * analogRead(analog_input[_pin].port);
@@ -51,6 +61,10 @@ double industrialli_analog_input::analog_read(uint8_t _pin){
     return vchannel_external;
 }
 
+bool industrialli_analog_input::alarm_020mA(float _mA, float _threshold){
+    return _mA < _threshold;
+}
+
 uint16_t industrialli_analog_input::get_vrefint_cal(){
     return *((uint16_t *)0x1FF1E860);
 }
@@ -58,19 +72,6 @@ uint16_t industrialli_analog_input::get_vrefint_cal(){
 uint16_t industrialli_analog_input::get_vrefint_data(){
     return analogRead(AVREF);
 }
-
-// bool industrialli_analogInputsHub::alarm020mA(float alarm020Val, float threshold){
-//     _alarm020Val = alarm020Val;
-   
-//     if (_alarm020Val < threshold){
-//         _alarm = true;
-
-//     }else{
-//         _alarm = false;
-//     }
-
-//     return _alarm;
-// }
 
 // int industrialli_analogInputsHub::getIntParamTSCAL1(){
 

@@ -46,8 +46,8 @@ public:
     
     void update_power_leds_status();
 
-    bool output_1_to_8_status();
-    bool output_9_to_16_status();
+    bool Q01_to_Q08_alarm();
+    bool Q09_to_Q16_alarm();
 
 private:
     uint16_t digital_outputs;

@@ -49,23 +49,31 @@ void industrialli_digital_output::set_digital_output_led(uint8_t _led, bool _val
 }
 
 void industrialli_digital_output::update_power_leds_status(){
-    if (digitalRead(IC1_ISO_DIAG)){
+    if(digitalRead(IC1_ISO_DIAG)){
         leds.set_led(22, HIGH);
     }else{
         leds.set_led(22, LOW);
     }
 
-    if (digitalRead(IC2_ISO_DIAG)){
+    if(digitalRead(IC2_ISO_DIAG)){
         leds.set_led(23, HIGH);
     }else{
         leds.set_led(23, LOW);
     }
 }
 
-bool industrialli_digital_output::output_1_to_8_status(){
-    return digitalRead(IC1_ISO_DIAG);
+bool industrialli_digital_output::Q01_to_Q08_alarm(){
+    if(digitalRead(ISO_DIS)){
+        return digitalRead(IC1_ISO_DIAG);
+    }
+
+    return false;
 }
 
-bool industrialli_digital_output::output_9_to_16_status(){
-    return digitalRead(IC2_ISO_DIAG);
+bool industrialli_digital_output::Q09_to_Q16_alarm(){
+    if(digitalRead(ISO_DIS)){
+        return digitalRead(IC2_ISO_DIAG);
+    }
+
+    return false;
 }

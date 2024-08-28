@@ -11,7 +11,8 @@ void industrialli_ethernet::begin(){
     spi_ethernet.setMISO(PB14);
     spi_ethernet.setMOSI(PB15);
     spi_ethernet.setSCLK(PB13);
-    // spi_ethernet.setSSEL(PB12);
 
     Ethernet.init(PB12);
 }
+
+//reset ic

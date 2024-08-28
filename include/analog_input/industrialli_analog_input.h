@@ -26,6 +26,9 @@ public:
     void set_read_mode(uint8_t _pin, uint8_t _read_mode);
     void set_resolution(uint16_t _resolution);
     double analog_read(uint8_t _pin);
+    double map(double _value, double _in_min, double _in_max, double _out_min, double _out_max);
+    double map_pin(uint8_t _pin, double _in_min, double _in_max, double _out_min, double _out_max);
+    bool alarm_020mA(float _mA, float _threshold);
 
 private:
     analog_input_struct analog_input[4];

@@ -108,4 +108,52 @@ void I08_COUNTING_DOWN_CALLBACK(){
     interrupts();
 }
 
+void I01_RESET_COUNTER_CALLBACK(){
+    noInterrupts();
+    i01_count = 0;
+    interrupts();
+}
+
+void I02_RESET_COUNTER_CALLBACK(){
+    noInterrupts();
+    i02_count = 0;
+    interrupts();
+}
+
+void I03_RESET_COUNTER_CALLBACK(){
+    noInterrupts();
+    i03_count = 0;
+    interrupts();
+}
+
+void I04_RESET_COUNTER_CALLBACK(){
+    noInterrupts();
+    i04_count = 0;
+    interrupts();
+}
+
+void I05_RESET_COUNTER_CALLBACK(){
+    noInterrupts();
+    i05_count = 0;
+    interrupts();
+}
+
+void I06_RESET_COUNTER_CALLBACK(){
+    noInterrupts();
+    i06_count = 0;
+    interrupts();
+}
+
+void I07_RESET_COUNTER_CALLBACK(){
+    noInterrupts();
+    i07_count = 0;
+    interrupts();
+}
+
+void I08_RESET_COUNTER_CALLBACK(){
+    noInterrupts();
+    i08_count = 0;
+    interrupts();
+}
+
 #endif
