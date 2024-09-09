@@ -11,10 +11,10 @@ private:
     uint8_t server_address;
 
     HardwareSerial *serial;
-    uint16_t t15;
-    uint16_t t35;
+    uint32_t t15;
+    uint32_t t35;
 
-    uint8_t de_pin;
+    uint32_t de_pin;
 
     uint8_t frame[256];
     uint8_t frame_size;
@@ -39,7 +39,8 @@ private:
     uint16_t crc(uint8_t _address, uint8_t *_pdu, int _pdu_size);
 
 public:
-    void begin(HardwareSerial *_serial, long _baud, int _de_pin);
+    Industrialli_Modbus_RTU_Server(HardwareSerial *_serial);
+    void begin();
 
     void set_server_address(uint8_t _server_address);
     uint8_t get_server_address();

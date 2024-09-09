@@ -9,11 +9,11 @@
 class Industrialli_Modbus_RTU_Client : public Industrialli_Modbus_RTU{
 private:
     HardwareSerial *serial;
-    uint16_t t15;
-    uint16_t t35;
-    uint8_t response_timeout;
+    uint32_t t15;
+    uint32_t t35;
+    uint32_t response_timeout;
 
-    uint8_t de_pin;
+    uint32_t de_pin;
 
     uint8_t frame[256];
     uint8_t frame_size;
@@ -33,7 +33,8 @@ private:
     uint16_t crc(uint8_t _address, uint8_t *_pdu, int _pdu_size);
 
 public:
-    void begin(HardwareSerial *_seria, long _baud, int _de_pin);
+    Industrialli_Modbus_RTU_Client(HardwareSerial *_serial);
+    void begin();
 
     uint8_t get_last_exception_response();
 

@@ -37,7 +37,10 @@ public:
     void enable_analog(uint8_t _pin);
     void update_leds();
 
+<<<<<<< HEAD
+=======
 private:
+>>>>>>> f6538ce05652f915e65e9a7680b3b738f9becd15
     digital_input_struct digital_input[12];
 };
 

@@ -40,6 +40,12 @@ void industrialli_digital_output::write(uint8_t _output, bool _value){
     set_digital_output_led(_output - 1, _value);
 }
 
+void industrialli_digital_output::toggle(uint8_t _output){
+    digital_outputs ^= 0x01 << (_output - 1);
+
+    set_digital_output_led(_output - 1,  0x01 ^ (digital_outputs >> (_output - 1)));
+}
+
 void industrialli_digital_output::set_digital_output_led(uint8_t _led, bool _value){
     if(_led < 8){
         leds.set_led(_led + 12, _value);

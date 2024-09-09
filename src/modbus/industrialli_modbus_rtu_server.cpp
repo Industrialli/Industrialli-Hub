@@ -19,7 +19,7 @@ void Industrialli_Modbus_RTU_Server::process_request_read_coils(uint16_t _start_
     for(int reg = _n_coils - 1, bitpos = 0; reg >= 0; reg--, _start_address++, bitpos++){
         if(bitpos == 8) bitpos = 0;
 
-        if(get_input_coil(_start_address)){
+        if(get_status_coil(_start_address)){
             bitSet(frame[(2 + (_n_coils-reg)/8)], bitpos);
         }else {
             bitClear(frame[(2 + (_n_coils-reg)/8)], bitpos);
@@ -49,7 +49,7 @@ void Industrialli_Modbus_RTU_Server::process_request_read_input_coils(uint16_t _
     for(int reg = _n_coils - 1, bitpos = 0; reg >= 0; reg--, _start_address++, bitpos++){
         if(bitpos == 8) bitpos = 0;
 
-        if(get_status_coil(_start_address)){
+        if(get_input_coil(_start_address)){
             bitSet(frame[(2 + (_n_coils-reg)/8)], bitpos);
         }else {
             bitClear(frame[(2 + (_n_coils-reg)/8)], bitpos);
@@ -285,8 +285,8 @@ void Industrialli_Modbus_RTU_Server::exception_response(uint8_t _error_code, uin
 
 void Industrialli_Modbus_RTU_Server::send_normal_response(){
     digitalWrite(de_pin, HIGH);
-    delay(1);
-
+    delay(5);
+        
     serial->write(get_server_address());
     serial->write(frame, frame_size);
 
@@ -304,7 +304,7 @@ void Industrialli_Modbus_RTU_Server::send_normal_response(){
 
 void Industrialli_Modbus_RTU_Server::send_echo_response(){
     digitalWrite(de_pin, HIGH);
-    delay(1);
+    delay(5);
 
     serial->write(frame, frame_size);
     serial->flush();
@@ -343,19 +343,20 @@ uint16_t Industrialli_Modbus_RTU_Server::crc(uint8_t _address, uint8_t *_pdu, in
     return (uchCRCHi << 8 | uchCRCLo);
 }
 
-void Industrialli_Modbus_RTU_Server::begin(HardwareSerial *_serial, long _baud, int _de_pin){
-    serial         = _serial;
+Industrialli_Modbus_RTU_Server::Industrialli_Modbus_RTU_Server(HardwareSerial *_serial){
+    serial = _serial;
+}
+
+void Industrialli_Modbus_RTU_Server::begin(){
     registers_head = NULL;
     registers_last = NULL;
-    de_pin      = _de_pin;
+    de_pin         = PD4;
 
-    if(_baud > 19200){
-        t15 = 750;
-        t35 = 1750;
-    }else{
-        t15 = 15000000/_baud; 
-        t35 = 35000000/_baud;
-    }
+    pinMode(de_pin, OUTPUT);
+    digitalWrite(de_pin, LOW);
+
+    t15 = 15000000/9600; 
+    t35 = 35000000/9600;
 
     clear_rx_buffer();
 }

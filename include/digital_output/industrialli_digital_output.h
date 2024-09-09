@@ -43,6 +43,7 @@ public:
     void update();
 
     void write(uint8_t _port, bool _value);
+    void toggle(uint8_t _output);
     
     void update_power_leds_status();
 

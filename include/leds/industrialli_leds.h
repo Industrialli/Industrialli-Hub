@@ -15,6 +15,7 @@ public:
     void begin();
     void start();
     void set_led(uint8_t _led, bool _value);
+    void toggle(uint8_t _led);
     void set_all(bool _value);
     void update();
 

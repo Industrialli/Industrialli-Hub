@@ -1,12 +1,15 @@
 #include <Arduino.h>
+<<<<<<< HEAD
+#include <Ethernet2.h>
+#include <EasyNextionLibrary.h>
+#include <LoRaMESH.h>
+=======
+>>>>>>> f6538ce05652f915e65e9a7680b3b738f9becd15
 
 #include "leds/industrialli_leds.h"
-#include "loramesh/industrialli_loramesh.h"
 #include "digital_output/industrialli_digital_output.h"
 #include "digital_input/industrialli_digital_input.h"
 #include "analog_input/industrialli_analog_input.h"
-#include "nextion/industrialli_nextion.h"
-#include "ethernet/industrialli_ethernet.h"
 #include "modbus/industrialli_modbus_rtu_client.h"
 #include "modbus/industrialli_modbus_rtu_server.h"
 
@@ -17,17 +20,16 @@ SPIClass spi_leds;
 SPIClass spi_iso;
 SPIClass spi_ethernet;
 
-HardwareSerial modbus_serial(RS485_USART2_RX, RS485_USART2_TX);
-HardwareSerial lora_serial(LORA_CMD_UART8_RX, LORA_CMD_UART8_TX);
-HardwareSerial nextion_serial(NEXTION_USART3_RX, NEXTION_USART3_TX);
+HardwareSerial modbus_serial(PD6, PD5);
+HardwareSerial lora_serial(PE0, PE1);
+HardwareSerial nextion_serial(PD9, PD8);
 
 industrialli_leds leds;
 industrialli_digital_output digital_output;
-Industrialli_Modbus_RTU_Server modbus_server;
-Industrialli_Modbus_RTU_Client modbus_client;
-industrialli_ethernet ethernet;
 industrialli_digital_input digital_input;
 industrialli_analog_input analog_input;
+Industrialli_Modbus_RTU_Server modbus_server(&modbus_serial);
+Industrialli_Modbus_RTU_Client modbus_client(&modbus_serial);
 LoRaMESH lora(&lora_serial);
 EasyNex nextion(nextion_serial);
 
