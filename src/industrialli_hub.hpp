@@ -1,10 +1,7 @@
 #include <Arduino.h>
-<<<<<<< HEAD
 #include <Ethernet2.h>
 #include <EasyNextionLibrary.h>
 #include <LoRaMESH.h>
-=======
->>>>>>> f6538ce05652f915e65e9a7680b3b738f9becd15
 
 #include "leds/industrialli_leds.h"
 #include "digital_output/industrialli_digital_output.h"
