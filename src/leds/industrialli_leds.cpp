@@ -7,7 +7,6 @@ void industrialli_leds::begin(){
     spi_leds.setMOSI(SPI1_MOSI);
     spi_leds.setSCLK(SPI1_SCK);
     spi_leds.begin();
-    spi_leds.beginTransaction(SPISettings(2000000UL, LSBFIRST, SPI_MODE0));
 
     start();
 }
@@ -52,10 +51,12 @@ void industrialli_leds::set_all(bool _value){
 }
 
 void industrialli_leds::update(){
+    spi_leds.beginTransaction(SPISettings(2000000UL, LSBFIRST, SPI_MODE0));
     digitalWrite(SPI1_NSS, LOW);
     spi_leds.transfer(leds >> 24);
     spi_leds.transfer(leds >> 16);
     spi_leds.transfer(leds >> 8);
     spi_leds.transfer(leds & 0xFF);
     digitalWrite(SPI1_NSS, HIGH);
+    spi_leds.endTransaction();
 }

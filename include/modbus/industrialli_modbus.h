@@ -1,5 +1,5 @@
-#ifndef INDUSTRIALLI_MODBUS_RTU_H
-#define INDUSTRIALLI_MODBUS_RTU_H
+#ifndef INDUSTRIALLI_MODBUS_H
+#define INDUSTRIALLI_MODBUS_H
 
 #include <cstdint>
 
@@ -75,7 +75,7 @@ typedef struct Register {
     struct Register* next;
 } Register;
 
-class Industrialli_Modbus_RTU{
+class Industrialli_Modbus{
 protected:
     Register *registers_head;
     Register *registers_last;

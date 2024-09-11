@@ -36,7 +36,7 @@ void industrialli_digital_input::begin(){
 
 void industrialli_digital_input::attach_interrupt(uint8_t _pin, void (*_callback)(), uint32_t _read_mode){
     digital_input[_pin].read_mode = _read_mode;
-    attachInterrupt(digital_input[_pin].port, _callback, _read_mode);
+    attachInterrupt(digitalPinToInterrupt(digital_input[_pin].port), _callback, _read_mode);
 }
 
 int industrialli_digital_input::read(uint8_t _pin){

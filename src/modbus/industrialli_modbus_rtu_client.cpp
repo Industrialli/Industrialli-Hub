@@ -1,28 +1,37 @@
 #include "modbus/industrialli_modbus_rtu_client.h"
 
-void Industrialli_Modbus_RTU_Client::process_response_read_coils(uint16_t _start_address, uint16_t _n_coils){
-    for (int reg = 0, bitpos = 0; reg < _n_coils; reg++, bitpos++, _start_address++){
-        if(bitpos == 8) bitpos = 0;
-        set_status_coil(_start_address, bitRead(frame[(3 + reg/8)], bitpos));
-    }
+void Industrialli_Modbus_RTU_Client::create_pdu_read_coils(uint8_t _address){
+    pdu[0] = _address;
+    pdu[1] = adu[0];
+    pdu[2] = adu[1];
+    pdu[3] = adu[2];
+    pdu[4] = adu[3];
+    pdu[5] = adu[4];
+
+    uint16_t adu_crc = crc(_address, adu, 5);
+
+    pdu[6] = adu_crc >> 8;
+    pdu[7] = adu_crc & 0xFF;
+
+    pdu_size = 8;
+};
+
+void Industrialli_Modbus_RTU_Client::process_pdu_read_coils(){
+    adu = pdu;
 }
 
-void Industrialli_Modbus_RTU_Client::process_response_read_input_coils(uint16_t _start_address, uint16_t _n_coils){
-    for (int reg = 0, bitpos = 0; reg < _n_coils; reg++, bitpos++, _start_address++){
-        if(bitpos == 8) bitpos = 0;
-        set_input_coil(_start_address, bitRead(frame[(3 + reg/8)], bitpos));
-    }
-}
+void Industrialli_Modbus_RTU_Client::read_coils(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils){
+    create_adu_read_coils(_address, _starting_address, _quantity_of_coils);
+    create_pdu_read_coils(_address);
 
-void Industrialli_Modbus_RTU_Client::process_response_read_holding_registers(uint16_t _start_address, uint16_t _n_of_registers){
-    for (uint16_t address = 3, index = 0; index < _n_of_registers; address += 2, index++){
-        set_holding_register(_start_address + index, (frame[address] << 8) | frame[address + 1]);
-    }
-}
+    send_request();
 
-void Industrialli_Modbus_RTU_Client::process_response_read_input_registers(uint16_t _start_address, uint16_t _n_of_registers){
-for (uint16_t address = 3, index = 0; index < _n_of_registers; address += 2, index++){
-        set_input_register(_start_address + index, (frame[address] << 8) | frame[address + 1]);
+    if(receive_response()){
+        if(is_exception_response(FC_READ_COILS)){
+            last_exception_response = pdu[2];
+        }else {
+            process_adu_read_coils(_starting_address, _quantity_of_coils);
+        }
     }
 }
 
@@ -30,7 +39,7 @@ void Industrialli_Modbus_RTU_Client::send_request(){
     digitalWrite(de_pin, HIGH);
     delay(1);
 
-    serial->write(frame, frame_size);
+    serial->write(pdu, pdu_size);
     serial->flush();
 
     delayMicroseconds(t35);
@@ -39,7 +48,7 @@ void Industrialli_Modbus_RTU_Client::send_request(){
 }
 
 bool Industrialli_Modbus_RTU_Client::receive_response(){
-    frame_size = 0;
+    pdu_size = 0;
     unsigned long startTime = millis();
 
     while (!serial->available()) {
@@ -53,28 +62,24 @@ bool Industrialli_Modbus_RTU_Client::receive_response(){
         do{
             if (serial->available()) {
                 startTime = micros();
-                frame[frame_size++] = serial->read();
+                pdu[pdu_size++] = serial->read();
                 
             }
         
-        }while (micros() - startTime <= t15 && frame_size < 256);
+        }while (micros() - startTime <= t15 && pdu_size < 256);
 
         while (micros() - startTime < t35);
 
-        if(frame_size == 0) return false;
+        if(pdu_size == 0) return false;
 
-        uint16_t crc_frame = (frame[frame_size - 2] << 8) | (frame[frame_size - 1]);
+        uint16_t crc_frame = (pdu[pdu_size - 2] << 8) | (pdu[pdu_size - 1]);
 
-        if(crc_frame == crc(frame[0], &frame[1], frame_size - 3)){
+        if(crc_frame == crc(pdu[0], &pdu[1], pdu_size - 3)){
             return true;
         }
     }
     
     return false;
-}
-
-bool Industrialli_Modbus_RTU_Client::is_exception_response(uint8_t _function_code){
-    return frame[1] == _function_code + 0x80;
 }
 
 void Industrialli_Modbus_RTU_Client::clear_rx_buffer(){
@@ -88,7 +93,7 @@ void Industrialli_Modbus_RTU_Client::clear_rx_buffer(){
     }while (micros() - start_time < t35);
 }
 
-uint16_t Industrialli_Modbus_RTU_Client::crc(uint8_t _address, uint8_t *_pdu, int _pdu_size){
+uint16_t Industrialli_Modbus_RTU_Client::crc(uint8_t _address, uint8_t *_adu, int _adu_size){
     uint8_t uchCRCHi = 0xFF;
     uint8_t uchCRCLo = 0xFF;
     uint8_t index;
@@ -97,8 +102,8 @@ uint16_t Industrialli_Modbus_RTU_Client::crc(uint8_t _address, uint8_t *_pdu, in
     uchCRCLo = uchCRCHi ^ auchCRCHi[index];
     uchCRCHi = auchCRCLo[index];
     
-    while(_pdu_size--){
-        index   = uchCRCLo ^ *_pdu++;
+    while(_adu_size--){
+        index   = uchCRCLo ^ *_adu++;
         uchCRCLo = uchCRCHi ^ auchCRCHi[index];
         uchCRCHi = auchCRCLo[index];
     }
@@ -106,14 +111,11 @@ uint16_t Industrialli_Modbus_RTU_Client::crc(uint8_t _address, uint8_t *_pdu, in
     return (uchCRCHi << 8 | uchCRCLo);
 }
 
-Industrialli_Modbus_RTU_Client::Industrialli_Modbus_RTU_Client(HardwareSerial *_serial){
-    serial = _serial;
-}
-
-void Industrialli_Modbus_RTU_Client::begin(){
+void Industrialli_Modbus_RTU_Client::begin(HardwareSerial *_serial){
     registers_head   = NULL;
     registers_last   = NULL;
     de_pin           = PD4;
+    serial           = _serial;
     response_timeout = 100;
     last_exception_response = 0;
 
@@ -124,223 +126,4 @@ void Industrialli_Modbus_RTU_Client::begin(){
     t35 = 35000000/9600;
 
     clear_rx_buffer();
-}
-
-uint8_t Industrialli_Modbus_RTU_Client::get_last_exception_response(){
-    return last_exception_response;
-}
-
-void Industrialli_Modbus_RTU_Client::read_coils(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils){
-    frame[0] = _address;
-    frame[1] = FC_READ_COILS;
-    frame[2] = _starting_address >> 8;
-    frame[3] = _starting_address & 0xFF;
-    frame[4] = _quantity_of_coils >> 8;
-    frame[5] = _quantity_of_coils & 0xFF;
-
-    uint16_t frame_crc = crc(_address, &frame[1], 5);
-
-    frame[6] = frame_crc >> 8;
-    frame[7] = frame_crc & 0xFF;
-
-    frame_size = 8;
-
-    send_request();
-
-    if(receive_response()){
-        if(is_exception_response(FC_READ_COILS)){
-            last_exception_response = frame[2];
-        }else {
-            process_response_read_coils(_starting_address, _quantity_of_coils);
-        }
-    }
-}
-
-void Industrialli_Modbus_RTU_Client::read_input_coils(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils){
-    frame[0] = _address;
-    frame[1] = FC_READ_INPUT_COILS;
-    frame[2] = _starting_address >> 8;
-    frame[3] = _starting_address & 0xFF;
-    frame[4] = _quantity_of_coils >> 8;
-    frame[5] = _quantity_of_coils & 0xFF;
-
-    uint16_t frame_crc = crc(_address, &frame[1], 5);
-
-    frame[6] = frame_crc >> 8;
-    frame[7] = frame_crc & 0xFF;
-
-    frame_size = 8;
-
-    send_request();
-    
-    if(receive_response()){
-        if(is_exception_response(FC_READ_INPUT_COILS)){
-            last_exception_response = frame[2];
-        }else {
-            process_response_read_input_coils(_starting_address, _quantity_of_coils);
-        }
-    }
-}
-
-void Industrialli_Modbus_RTU_Client::read_holding_registers(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils){
-    frame[0] = _address;
-    frame[1] = FC_READ_HOLDING_REGISTERS;
-    frame[2] = _starting_address >> 8;
-    frame[3] = _starting_address & 0xFF;
-    frame[4] = _quantity_of_coils >> 8;
-    frame[5] = _quantity_of_coils & 0xFF;
-
-    uint16_t frame_crc = crc(_address, &frame[1], 5);
-
-    frame[6] = frame_crc >> 8;
-    frame[7] = frame_crc & 0xFF;
-
-    frame_size = 8;
-
-    send_request();
-    
-    if(receive_response()){
-        if(is_exception_response(FC_READ_HOLDING_REGISTERS)){
-            last_exception_response = frame[2];
-        }else {
-            process_response_read_holding_registers(_starting_address, _quantity_of_coils);
-        }
-    }
-}
-
-void Industrialli_Modbus_RTU_Client::read_input_registers(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils){
-    frame[0] = _address;
-    frame[1] = FC_READ_INPUT_REGISTERS;
-    frame[2] = _starting_address >> 8;
-    frame[3] = _starting_address & 0xFF;
-    frame[4] = _quantity_of_coils >> 8;
-    frame[5] = _quantity_of_coils & 0xFF;
-
-    uint16_t frame_crc = crc(_address, &frame[1], 5);
-
-    frame[6] = frame_crc >> 8;
-    frame[7] = frame_crc & 0xFF;
-
-    frame_size = 8;
-
-    send_request();
-    
-    if(receive_response()){
-        if(is_exception_response(FC_READ_INPUT_REGISTERS)){
-            last_exception_response = frame[2];
-        }else {
-            process_response_read_input_registers(_starting_address, _quantity_of_coils);
-        }
-    }
-}
-
-void Industrialli_Modbus_RTU_Client::write_single_coil(uint8_t _address, uint16_t _coil_address, uint16_t _value){
-    frame[0] = _address;
-    frame[1] = FC_WRITE_SINGLE_COIL;
-    frame[2] = _coil_address >> 8;
-    frame[3] = _coil_address & 0xFF;
-    frame[4] = _value >> 8;
-    frame[5] = _value & 0xFF;
-
-    uint16_t frame_crc = crc(_address, &frame[1], 5);
-
-    frame[6] = frame_crc >> 8;
-    frame[7] = frame_crc & 0xFF;
-
-    frame_size = 8;
-
-    send_request();
-    
-    if(receive_response()){
-        if(is_exception_response(FC_WRITE_SINGLE_COIL)){
-            last_exception_response = frame[2];
-        }
-    }
-}
-
-void Industrialli_Modbus_RTU_Client::write_single_register(uint8_t _address, uint16_t _register_address, uint16_t _value){
-    frame[0] = _address;
-    frame[1] = FC_WRITE_SINGLE_REGISTER;
-    frame[2] = _register_address >> 8;
-    frame[3] = _register_address & 0xFF;
-    frame[4] = _value >> 8;
-    frame[5] = _value & 0xFF;
-
-    uint16_t frame_crc = crc(_address, &frame[1], 5);
-
-    frame[6] = frame_crc >> 8;
-    frame[7] = frame_crc & 0xFF;
-
-    frame_size = 8;
-
-    send_request();
-
-    if(receive_response()){
-        if(is_exception_response(FC_WRITE_SINGLE_REGISTER)){
-            last_exception_response = frame[2];
-        }
-    }
-}
-
-void Industrialli_Modbus_RTU_Client::write_multiple_coils(uint8_t _address, uint16_t _starting_address, uint8_t* _values, uint16_t _quantity_of_coils){
-    frame[0] = _address;
-    frame[1] = FC_WRITE_MULTIPLE_COILS;
-    frame[2] = _starting_address >> 8;
-    frame[3] = _starting_address & 0xFF;
-    frame[4] = _quantity_of_coils >> 8;
-    frame[5] = _quantity_of_coils & 0xFF;
-    frame[6] = ceil(_quantity_of_coils / 8.0);
-
-    for (uint16_t i = 0; i < _quantity_of_coils; i++) {
-        bitWrite(frame[7 + (i >> 3)], i & 7, _values[i]);
-    }
-
-    for (uint16_t i = _quantity_of_coils; i < (frame[6] * 8); i++) {
-        bitClear(frame[7 + (i >> 3)], i & 7);
-    }
-
-    uint16_t frame_crc = crc(_address, &frame[1], 6 + frame[6]);
-
-    frame[7 + frame[6]] = frame_crc >> 8;
-    frame[8 + frame[6]] = frame_crc & 0xFF;
-
-    frame_size = 9 + frame[6];
-
-    send_request();
-
-    if(receive_response()){
-        if(is_exception_response(FC_WRITE_MULTIPLE_COILS)){
-            last_exception_response = frame[2];
-        }
-    }
-}
-
-void Industrialli_Modbus_RTU_Client::write_multiple_registers(uint8_t _address, uint16_t _starting_address, uint16_t* _values, uint16_t _quantity_of_registers){
-    frame[0] = _address;
-    frame[1] = FC_WRITE_MULTIPLE_REGISTERS;
-    frame[2] = _starting_address >> 8;
-    frame[3] = _starting_address & 0xFF;
-    frame[4] = _quantity_of_registers >> 8;
-    frame[5] = _quantity_of_registers & 0xFF;
-    frame[6] = _quantity_of_registers * 2;
-
-    for (int i = 0; i < _quantity_of_registers * 2; i += 2){
-        frame[7 + i] = _values[i/2] >> 8;
-        frame[8 + i] = _values[i/2] & 0xFF;
-    }
-    
-    uint16_t frame_crc = crc(_address, &frame[1], 6 + frame[6]);
-
-    frame[7 + frame[6]] = frame_crc >> 8;
-    frame[8 + frame[6]] = frame_crc & 0xFF;
-
-    frame_size = 9 + frame[6];
-
-    send_request();
-
-    if(receive_response()){
-        if(is_exception_response(FC_WRITE_MULTIPLE_REGISTERS)){
-            last_exception_response = frame[2];
-        }
-    }
 }
