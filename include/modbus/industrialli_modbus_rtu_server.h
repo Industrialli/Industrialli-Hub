@@ -26,6 +26,9 @@ private:
     uint16_t crc(uint8_t _address, uint8_t *_pdu, int _pdu_size);
 
 public:
+    Industrialli_Modbus_RTU_Server(HardwareSerial *_serial);
+    void begin();
+
     void set_server_address(uint8_t _server_address);
     uint8_t get_server_address();
     

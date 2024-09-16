@@ -1,33 +1,21 @@
-#include "industrialli_hub.hpp"
+// #include "industrialli_hub.hpp"
 
-industrialli_hub hub;
+// industrialli_hub hub;
 
-void setup(){
-	hub.begin();
+// void setup(){
+// 	hub.begin();
 
-    modbus_client.begin();
+//     modbus_client.begin();
+// }
 
-    modbus_client.create_status_coil(0, LOW);
-    modbus_client.create_status_coil(1, LOW);
-    modbus_client.create_status_coil(2, LOW);
-    modbus_client.create_status_coil(3, LOW);
-    modbus_client.create_status_coil(4, LOW);
-    modbus_client.create_status_coil(5, LOW);
-    modbus_client.create_status_coil(6, LOW);
-    modbus_client.create_status_coil(7, LOW);
-}
+// void loop(){
+//     uint8_t v[8] = {0,1,1,1,0,1,0,1};
+//     modbus_client.write_multiple_coils(10, 3, v, 8);
+//     delay(100);
 
-void loop(){
-	modbus_client.read_coils(10, 0, 8);
+//     uint16_t v2[8] = {2003, 2004, 2005, 2006, 2007, 2008, 2009, 2010};
 
-    Serial.println(modbus_client.get_status_coil(0));
-    Serial.println(modbus_client.get_status_coil(1));
-    Serial.println(modbus_client.get_status_coil(2));
-    Serial.println(modbus_client.get_status_coil(3));
-    Serial.println(modbus_client.get_status_coil(4));
-    Serial.println(modbus_client.get_status_coil(5));
-    Serial.println(modbus_client.get_status_coil(6));
-    Serial.println(modbus_client.get_status_coil(7));
+//     modbus_client.write_multiple_registers(10, 3, v2, 8);
     
-    delay(500);
-}
+//     delay(500);
+// }

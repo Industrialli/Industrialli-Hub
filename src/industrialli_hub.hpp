@@ -7,8 +7,10 @@
 #include "digital_output/industrialli_digital_output.h"
 #include "digital_input/industrialli_digital_input.h"
 #include "analog_input/industrialli_analog_input.h"
-#include "modbus/industrialli_modbus_rtu_client.h"
-#include "modbus/industrialli_modbus_rtu_server.h"
+// #include "modbus/industrialli_modbus_rtu_client.h"
+// #include "modbus/industrialli_modbus_rtu_server.h"
+#include "modbus/industrialli_modbus_tcp_client.h"
+#include "modbus/industrialli_modbus_tcp_server.h"
 
 #define DEBUG_LED PB10
 #define RS485_TER_SEL PE10
@@ -25,8 +27,10 @@ industrialli_leds leds;
 industrialli_digital_output digital_output;
 industrialli_digital_input digital_input;
 industrialli_analog_input analog_input;
-Industrialli_Modbus_RTU_Server modbus_server(&modbus_serial);
-Industrialli_Modbus_RTU_Client modbus_client(&modbus_serial);
+// Industrialli_Modbus_RTU_Server modbus_server(&modbus_serial);
+// Industrialli_Modbus_RTU_Client modbus_client(&modbus_serial);
+Industrialli_Modbus_TCP_Server modbus_server;
+Industrialli_Modbus_TCP_Client modbus_client;
 LoRaMESH lora(&lora_serial);
 EasyNex nextion(nextion_serial);
 
@@ -39,7 +43,7 @@ void industrialli_hub::begin(){
     pinMode(DEBUG_LED, OUTPUT);
     pinMode(RS485_TER_SEL, OUTPUT);
 
-    modbus_serial.begin(9600);
+    // modbus_serial.begin(9600);
     lora_serial.begin(9600);
     nextion_serial.begin(9600);
 

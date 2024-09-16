@@ -2,14 +2,13 @@
 #define INDUSTRIALLI_MODBUS_CLIENT_H
 
 #include <Arduino.h>
-
 #include "industrialli_modbus.h"
 
 class Industrialli_Modbus_Client : public Industrialli_Modbus{
 protected:
     uint8_t *pdu;
     uint8_t *pdu_ptr;
-    uint8_t pdu_size;
+    uint16_t pdu_size;
 
     uint8_t last_exception_response;
 
@@ -20,6 +19,8 @@ protected:
 
     bool is_exception_response(uint8_t _function_code);
     uint8_t get_last_exception_response();
+
+    void clear_pdu();
 };
 
 #endif

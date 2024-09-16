@@ -9,7 +9,8 @@
 class Industrialli_Modbus_Server : public Industrialli_Modbus{
 protected:
     uint8_t *pdu;
-    uint8_t pdu_size;
+    uint8_t *pdu_ptr;
+    uint16_t pdu_size;
     uint8_t pdu_reply_type;
     
     void process_request_read_coils(uint16_t _start_address, uint16_t _n_coils);
@@ -22,6 +23,8 @@ protected:
     void process_request_write_multiple_registers(uint8_t *_pdu, uint16_t _start_address, uint16_t _n_registers);
 
     void exception_response(uint8_t _error_code, uint8_t _exception_code);
+
+    void clear_pdu();
 };
 
 #endif
