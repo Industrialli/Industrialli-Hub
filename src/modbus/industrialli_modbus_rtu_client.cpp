@@ -153,12 +153,12 @@ void Industrialli_Modbus_RTU_Client::read_input_coils(uint8_t _address, uint16_t
     }
 }
 
-void Industrialli_Modbus_RTU_Client::read_holding_registers(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils){
+void Industrialli_Modbus_RTU_Client::read_holding_registers(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_registers){
     pdu[0] = FC_READ_HOLDING_REGISTERS;
     pdu[1] = _starting_address >> 8;
     pdu[2] = _starting_address & 0xFF;
-    pdu[3] = _quantity_of_coils >> 8;
-    pdu[4] = _quantity_of_coils & 0xFF;
+    pdu[3] = _quantity_of_registers >> 8;
+    pdu[4] = _quantity_of_registers & 0xFF;
 
     pdu_size = 5;
 
@@ -168,7 +168,7 @@ void Industrialli_Modbus_RTU_Client::read_holding_registers(uint8_t _address, ui
         if(is_exception_response(FC_READ_HOLDING_REGISTERS)){
             last_exception_response = pdu[1];
         }else {
-            process_response_read_holding_registers(_starting_address, _quantity_of_coils);
+            process_response_read_holding_registers(_starting_address, _quantity_of_registers);
         }
     }
 }

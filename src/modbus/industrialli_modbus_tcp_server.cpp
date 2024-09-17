@@ -78,7 +78,7 @@ void Industrialli_Modbus_TCP_Server::send_normal_response(EthernetClient *_clien
     _client->write(pdu, pdu_size);
 
     _client->flush();
-    _client->stop();
+    // _client->stop();
 }
 
 void Industrialli_Modbus_TCP_Server::begin(EthernetServer *_server){
