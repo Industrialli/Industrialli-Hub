@@ -4,14 +4,13 @@
 
 #define AIO_SERVER      "io.adafruit.com"
 #define AIO_SERVERPORT  1883
-#define AIO_USERNAME    "opallace"
-#define AIO_KEY         "aio_DQmb66ocrc9ceB3hXe9CVff1e7Sx"
+
 
 industrialli_hub hub;
 EthernetClient client_adafruit;
 EthernetClient client;
 
-Adafruit_MQTT_Client mqtt(&client_adafruit, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
+// Adafruit_MQTT_Client mqtt(&client_adafruit, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
 Adafruit_MQTT_Publish hz = Adafruit_MQTT_Publish(&mqtt,  AIO_USERNAME "/feeds/hzz");
 Adafruit_MQTT_Publish temperature = Adafruit_MQTT_Publish(&mqtt,  AIO_USERNAME "/feeds/temperature");
 Adafruit_MQTT_Publish vibration = Adafruit_MQTT_Publish(&mqtt,  AIO_USERNAME "/feeds/vibration");
