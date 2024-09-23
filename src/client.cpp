@@ -1,75 +1,69 @@
 #include "industrialli_hub.hpp"
+#include <Adafruit_MQTT.h>
+#include <Adafruit_MQTT_Client.h>
+
+#define AIO_SERVER      "io.adafruit.com"
+#define AIO_SERVERPORT  1883
+#define AIO_USERNAME    "opallace"
+#define AIO_KEY         "aio_DQmb66ocrc9ceB3hXe9CVff1e7Sx"
 
 industrialli_hub hub;
+EthernetClient client_adafruit;
 EthernetClient client;
 
-uint8_t mac[] = {0xDE, 0xAD, 0xBE, 0xEF, 0xFE, 0xDD};
-IPAddress ip  = {172, 16, 83, 202};
-IPAddress subnet_mask = {255, 255, 252, 0};
+Adafruit_MQTT_Client mqtt(&client_adafruit, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
+Adafruit_MQTT_Publish hz = Adafruit_MQTT_Publish(&mqtt,  AIO_USERNAME "/feeds/hzz");
+Adafruit_MQTT_Publish temperature = Adafruit_MQTT_Publish(&mqtt,  AIO_USERNAME "/feeds/temperature");
+Adafruit_MQTT_Publish vibration = Adafruit_MQTT_Publish(&mqtt,  AIO_USERNAME "/feeds/vibration");
+
+uint8_t mac[]  = {0xDE, 0xAD, 0xBE, 0x68, 0x68, 0x6C};
 
 void setup(){
 	hub.begin();
 
     Ethernet.init();
-    Ethernet.begin(mac, ip, subnet_mask);
+    Ethernet.begin(mac);
 
-    client.connect("172.16.83.205", 502);
+    client.connect("172.16.82.40", 502);
 
     modbus_client.begin(&client);
+    modbus_client.create_holding_register(121, 0);
 
-    modbus_client.create_status_coil(0, LOW);
-    modbus_client.create_status_coil(1, LOW);
-    modbus_client.create_status_coil(2, LOW);
-    modbus_client.create_status_coil(3, LOW);
-    modbus_client.create_status_coil(4, LOW);
-    modbus_client.create_status_coil(5, LOW);
-    modbus_client.create_status_coil(6, LOW);
-    modbus_client.create_status_coil(7, LOW);
-    modbus_client.create_status_coil(8, LOW);
-    modbus_client.create_status_coil(9, LOW);
-    modbus_client.create_status_coil(10, LOW);
-
-    modbus_client.create_holding_register(0, 0);
-    modbus_client.create_holding_register(1, 0);
-    modbus_client.create_holding_register(2, 0);
-    modbus_client.create_holding_register(3, 0);
-    modbus_client.create_holding_register(4, 0);
-    modbus_client.create_holding_register(5, 0);
-    modbus_client.create_holding_register(6, 0);
-    modbus_client.create_holding_register(7, 0);
-    modbus_client.create_holding_register(8, 0);
-    modbus_client.create_holding_register(9, 0);
-    modbus_client.create_holding_register(10, 0);
+    analog_input.begin();
+    analog_input.set_read_mode(A01, READ_10V);
+    analog_input.set_read_mode(A02, READ_10V);
 }
 
 void loop(){
-    modbus_client.read_coils(10, 0, 11);
+    if(mqtt.connected()){
+        modbus_client.write_single_register(121, 100);
+        delay(5000);
 
-    Serial.println(modbus_client.get_status_coil(0));
-    Serial.println(modbus_client.get_status_coil(1));
-    Serial.println(modbus_client.get_status_coil(2));
-    Serial.println(modbus_client.get_status_coil(3));
-    Serial.println(modbus_client.get_status_coil(4));
-    Serial.println(modbus_client.get_status_coil(5));
-    Serial.println(modbus_client.get_status_coil(6));
-    Serial.println(modbus_client.get_status_coil(7));
-    Serial.println(modbus_client.get_status_coil(8));
-    Serial.println(modbus_client.get_status_coil(9));
-    Serial.println(modbus_client.get_status_coil(10));
+        modbus_client.read_holding_registers(121, 1);
+        hz.publish((double)modbus_client.get_holding_register(121)/10.0);
+        
+        modbus_client.write_single_register(121, 300);
+        delay(5000);
+        
+        modbus_client.read_holding_registers(121, 1);
+        hz.publish((double)modbus_client.get_holding_register(121)/10.0);
+        
+        modbus_client.write_single_register(121, 600);
+        delay(5000);
 
-    Serial.println(modbus_client.get_holding_register(0));
-    Serial.println(modbus_client.get_holding_register(1));
-    Serial.println(modbus_client.get_holding_register(2));
-    Serial.println(modbus_client.get_holding_register(3));
-    Serial.println(modbus_client.get_holding_register(4));
-    Serial.println(modbus_client.get_holding_register(5));
-    Serial.println(modbus_client.get_holding_register(6));
-    Serial.println(modbus_client.get_holding_register(7));
-    Serial.println(modbus_client.get_holding_register(8));
-    Serial.println(modbus_client.get_holding_register(9));
-    Serial.println(modbus_client.get_holding_register(10));
+        modbus_client.read_holding_registers(121, 1);
+        hz.publish((double)modbus_client.get_holding_register(121)/10.0);
 
-    Serial.println("######################################");
-    
-    delay(500);
+        delay(2000);
+        temperature.publish(analog_input.map_pin(A01, 0, 10, -40, 80));
+        delay(2000);
+        vibration.publish(analog_input.map_pin(A02, 0, 10, 10, 1600));
+
+    }else {
+        while(mqtt.connect()) {
+            mqtt.disconnect();
+            delay(5000);
+        }
+    }
+
 }

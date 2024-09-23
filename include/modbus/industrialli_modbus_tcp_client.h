@@ -9,23 +9,24 @@ private:
     EthernetClient *client;
 
     uint32_t response_timeout;
+    uint16_t transaction_id; 
 
     uint8_t MBAP[7];
 
     void send_request();
-    bool receive_response();//~ok
+    bool receive_response();
 
 public:
     void begin(EthernetClient *_client);
 
-    void read_coils(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils);//~ok
-    void read_input_coils(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils);//~ok
-    void read_holding_registers(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_registers);//~ok
-    void read_input_registers(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_registers);//~ok
-    void write_single_coil(uint8_t _address, uint16_t _coil_address, bool _value);
-    void write_single_register(uint8_t _address, uint16_t _register_address, uint16_t _value);
-    void write_multiple_coils(uint8_t _address, uint16_t _starting_address, uint8_t* _values, uint16_t _quantity_of_coils);
-    void write_multiple_registers(uint8_t _address, uint16_t _starting_address, uint16_t* _values, uint16_t _quantity_of_registers);
+    void read_coils(uint16_t _starting_address, uint16_t _quantity_of_coils);
+    void read_input_coils(uint16_t _starting_address, uint16_t _quantity_of_coils);
+    void read_holding_registers(uint16_t _starting_address, uint16_t _quantity_of_registers);
+    void read_input_registers(uint16_t _starting_address, uint16_t _quantity_of_registers);
+    void write_single_coil(uint16_t _coil_address, bool _value);
+    void write_single_register(uint16_t _register_address, uint16_t _value);
+    void write_multiple_coils(uint16_t _starting_address, uint8_t* _values, uint16_t _quantity_of_coils);
+    void write_multiple_registers(uint16_t _starting_address, uint16_t* _values, uint16_t _quantity_of_registers);
 };
 
 #endif
