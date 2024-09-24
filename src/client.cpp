@@ -7,10 +7,7 @@ industrialli_hub hub;
 EthernetClient client_adafruit;
 EthernetClient client;
 
-Adafruit_MQTT_Client mqtt(&client_adafruit, AIO_SERVER, AIO_SERVERPORT, AIO_USERNAME, AIO_KEY);
-Adafruit_MQTT_Publish hz = Adafruit_MQTT_Publish(&mqtt,  AIO_USERNAME "/feeds/hzz");
-Adafruit_MQTT_Publish temperature = Adafruit_MQTT_Publish(&mqtt,  AIO_USERNAME "/feeds/temperature");
-Adafruit_MQTT_Publish vibration = Adafruit_MQTT_Publish(&mqtt,  AIO_USERNAME "/feeds/vibration");
+
 
 uint8_t mac[]  = {0xDE, 0xAD, 0xBE, 0x68, 0x68, 0x6C};
 
