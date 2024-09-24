@@ -18,6 +18,15 @@ void Industrialli_Modbus::create_register(uint16_t address, uint16_t value){
     }
 }
 
+void Industrialli_Modbus::free_registers(){
+    while(registers_head != NULL){
+        Register *to_delete = registers_head;
+        registers_head = registers_head->next;
+
+        free(to_delete);
+    }
+}
+
 void Industrialli_Modbus::set_register(uint16_t _address, uint16_t _value){
     Register *reg = search_register(_address);
     reg->value = _value;

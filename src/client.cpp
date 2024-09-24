@@ -5,7 +5,7 @@
 #define AIO_SERVER      "io.adafruit.com"
 #define AIO_SERVERPORT  1883
 #define AIO_USERNAME    "opallace"
-#define AIO_KEY         "aio_DQmb66ocrc9ceB3hXe9CVff1e7Sx"
+#define AIO_KEY         "aio_gelg08cWRiEvM6dlLMEu7IUfeWUi"
 
 industrialli_hub hub;
 EthernetClient client_adafruit;
@@ -37,24 +37,25 @@ void setup(){
 void loop(){
     if(mqtt.connected()){
         modbus_client.write_single_register(121, 100);
+        modbus_client.read_holding_registers(121, 1);
+        hz.publish((double)modbus_client.get_holding_register(121)/10.0);
         delay(10000);
 
-        modbus_client.read_holding_registers(121, 1);
-        hz.publish((double)modbus_client.get_holding_register(121)/10.0);
-        
         modbus_client.write_single_register(121, 300);
-        delay(10000);
-        
         modbus_client.read_holding_registers(121, 1);
         hz.publish((double)modbus_client.get_holding_register(121)/10.0);
+        delay(10000);
         
         modbus_client.write_single_register(121, 600);
-        delay(10000);
-
         modbus_client.read_holding_registers(121, 1);
         hz.publish((double)modbus_client.get_holding_register(121)/10.0);
+        delay(10000);
 
-        delay(2000);
+        modbus_client.write_single_register(121, 300);
+        modbus_client.read_holding_registers(121, 1);
+        hz.publish((double)modbus_client.get_holding_register(121)/10.0);
+        delay(10000);
+
         temperature.publish(analog_input.map_pin(A01, 0, 10, -40, 80));
         delay(2000);
         vibration.publish(analog_input.map_pin(A02, 0, 10, 10, 1600));

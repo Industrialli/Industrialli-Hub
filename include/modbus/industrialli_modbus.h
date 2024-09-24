@@ -81,6 +81,7 @@ protected:
     Register *registers_last;
 
     void create_register(uint16_t _address, uint16_t _value);
+    void free_registers();
     void set_register(uint16_t _address, uint16_t _value);
     uint16_t get_register(uint16_t _address);
     Register* search_register(uint16_t _address);

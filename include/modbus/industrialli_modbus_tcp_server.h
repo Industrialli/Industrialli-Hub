@@ -17,6 +17,7 @@ private:
 
 public:
     void begin(EthernetServer *_server);
+    void end();
 
     void task();
 };

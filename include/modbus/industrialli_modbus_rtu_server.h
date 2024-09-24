@@ -28,6 +28,7 @@ private:
 public:
     Industrialli_Modbus_RTU_Server(HardwareSerial *_serial);
     void begin();
+    void end();
 
     void set_server_address(uint8_t _server_address);
     uint8_t get_server_address();

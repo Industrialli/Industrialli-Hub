@@ -18,6 +18,7 @@ private:
 
 public:
     void begin(EthernetClient *_client);
+    void end();
 
     void read_coils(uint16_t _starting_address, uint16_t _quantity_of_coils);
     void read_input_coils(uint16_t _starting_address, uint16_t _quantity_of_coils);

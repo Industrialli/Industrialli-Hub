@@ -155,6 +155,11 @@ void Industrialli_Modbus_RTU_Server::begin(){
     clear_rx_buffer();
 }
 
+void Industrialli_Modbus_RTU_Server::end(){
+    free(pdu_ptr);
+    free_registers();
+}
+
 void Industrialli_Modbus_RTU_Server::set_server_address(uint8_t _server_address){
     server_address = _server_address;
 }

@@ -74,11 +74,18 @@ void Industrialli_Modbus_TCP_Server::send_normal_response(EthernetClient *_clien
     MBAP[4] = (pdu_size + 1) >> 8;  
     MBAP[5] = (pdu_size + 1) & 0x00FF;
 
-    _client->write(MBAP, 7);
-    _client->write(pdu, pdu_size);
+    uint8_t adu[7 + pdu_size];
+    
+    for(int i = 0; i < 7; i++){
+        adu[i] = MBAP[i];
+    }
 
+    for(int i = 0; i < pdu_size; i++){
+        adu[i + 7] = pdu[i];
+    }
+
+    _client->write(adu, 7 + pdu_size);
     _client->flush();
-    // _client->stop();
 }
 
 void Industrialli_Modbus_TCP_Server::begin(EthernetServer *_server){
@@ -90,6 +97,11 @@ void Industrialli_Modbus_TCP_Server::begin(EthernetServer *_server){
     registers_last = NULL;
 
     server = _server;
+}
+
+void Industrialli_Modbus_TCP_Server::end(){
+    free(pdu_ptr);
+    free_registers();
 }
 
 void Industrialli_Modbus_TCP_Server::task(){

@@ -15,6 +15,7 @@ void Industrialli_Modbus_TCP_Client::send_request(){
     }
 
     client->write(adu, 7 + pdu_size);
+    client->flush();
 }
 
 bool Industrialli_Modbus_TCP_Client::receive_response(){
@@ -61,6 +62,11 @@ void Industrialli_Modbus_TCP_Client::begin(EthernetClient *_client){
     last_exception_response = 0;
 
     client = _client;
+}
+
+void Industrialli_Modbus_TCP_Client::end(){
+    free(pdu_ptr);
+    free_registers();
 }
 
 void Industrialli_Modbus_TCP_Client::read_coils(uint16_t _starting_address, uint16_t _quantity_of_coils){

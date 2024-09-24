@@ -109,8 +109,8 @@ void Industrialli_Modbus_RTU_Client::begin(){
 }
 
 void Industrialli_Modbus_RTU_Client::end(){
-    free(pdu);
     free(pdu_ptr);
+    free_registers();
 }
 
 void Industrialli_Modbus_RTU_Client::read_coils(uint8_t _address, uint16_t _starting_address, uint16_t _quantity_of_coils){
