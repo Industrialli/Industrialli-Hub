@@ -2,10 +2,6 @@
 #include <Adafruit_MQTT.h>
 #include <Adafruit_MQTT_Client.h>
 
-#define AIO_SERVER      "io.adafruit.com"
-#define AIO_SERVERPORT  1883
-#define AIO_USERNAME    "opallace"
-#define AIO_KEY         "aio_gelg08cWRiEvM6dlLMEu7IUfeWUi"
 
 industrialli_hub hub;
 EthernetClient client_adafruit;
